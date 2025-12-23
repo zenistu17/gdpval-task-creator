@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GDPVal Task Creator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="animated-bg">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="orb orb4"></div>
+  </div>
+
+  <!-- Progress Indicator -->
+  <div class="progress-bar">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo-badge">
+        <span class="logo-icon">⚡</span>
+        <span class="logo-text">GDPVal</span>
+      </div>
+      <h1 class="header-title">Task Creator</h1>
+      <p class="header-subtitle">Build world-class AI evaluation tasks in minutes</p>
+    </header>
+
+    <!-- Main Form -->
+    <form id="taskForm" class="task-form">
+      <!-- Step 1: Task Details -->
+      <section class="form-section" data-step="1">
+        <div class="section-header">
+          <div class="step-indicator">
+            <span class="step-number">1</span>
+            <span class="step-line"></span>
+          </div>
+          <div class="step-info">
+            <h2 class="section-title">Task Details</h2>
+            <p class="section-subtitle">Define what the AI needs to accomplish</p>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <!-- Sector Dropdown -->
+          <div class="form-group">
+            <label class="form-label" for="sector">
+              <span class="label-icon">🏢</span>
+              Economic Sector
+            </label>
+            <div class="select-wrapper">
+              <select id="sector" class="form-select" required>
+                <option value="">Select a sector...</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <span class="field-hint">Choose the GDP sector this task belongs to</span>
+          </div>
+
+          <!-- Occupation Dropdown -->
+          <div class="form-group">
+            <label class="form-label" for="occupation">
+              <span class="label-icon">👤</span>
+              Occupation
+            </label>
+            <div class="select-wrapper">
+              <select id="occupation" class="form-select" required disabled>
+                <option value="">Select a sector first...</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+            <span class="field-hint">The professional role this task is designed for</span>
+          </div>
+        </div>
+
+        <!-- Task Instruction -->
+        <div class="form-group full-width">
+          <label class="form-label" for="instruction">
+            <span class="label-icon">📝</span>
+            Task Instruction
+          </label>
+          <div class="textarea-wrapper">
+            <textarea
+              id="instruction"
+              class="form-textarea"
+              rows="8"
+              placeholder="Describe what the AI should accomplish in detail...
+
+Example: You are a financial analyst tasked with analyzing Q3 earnings data. Using the provided spreadsheet, calculate year-over-year growth rates, identify trends, and create a summary report highlighting key insights for stakeholders."
+              required
+            ></textarea>
+            <div class="char-count">
+              <span id="charCount">0</span> / 5000
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Step 2: Reference Files -->
+      <section class="form-section" data-step="2">
+        <div class="section-header">
+          <div class="step-indicator">
+            <span class="step-number">2</span>
+            <span class="step-line"></span>
+          </div>
+          <div class="step-info">
+            <h2 class="section-title">Reference Files</h2>
+            <p class="section-subtitle">Upload materials the AI will need to complete the task</p>
+          </div>
+        </div>
+
+        <div class="upload-zone" id="referenceZone">
+          <div class="upload-icon">📎</div>
+          <div class="upload-text">Drop reference files here</div>
+          <p class="upload-hint">
+            Supports: .md, .pdf, .txt, .csv, .json, .xlsx, .pptx, .mov, .mp4, .png, .jpg
+          </p>
+          <input type="file" id="referenceInput" multiple accept=".md,.pdf,.txt,.csv,.json,.xlsx,.pptx,.mov,.mp4,.png,.jpg,.jpeg,.docx">
+          <button type="button" class="upload-btn">
+            <span>Browse Files</span>
+          </button>
+        </div>
+
+        <div class="file-list" id="referenceList"></div>
+      </section>
+
+      <!-- Step 3: Solution Artifacts -->
+      <section class="form-section" data-step="3">
+        <div class="section-header">
+          <div class="step-indicator">
+            <span class="step-number">3</span>
+            <span class="step-line"></span>
+          </div>
+          <div class="step-info">
+            <h2 class="section-title">Solution Artifacts</h2>
+            <p class="section-subtitle">Upload the correct solution files (protected from AI access)</p>
+          </div>
+        </div>
+
+        <div class="upload-zone solution-zone" id="solutionZone">
+          <div class="upload-icon">🔐</div>
+          <div class="upload-text">Drop solution files here</div>
+          <p class="upload-hint">
+            Code, documents, presentations, videos — any format that represents the solution
+          </p>
+          <input type="file" id="solutionInput" multiple>
+          <button type="button" class="upload-btn">
+            <span>Browse Files</span>
+          </button>
+        </div>
+
+        <div class="file-list" id="solutionList"></div>
+
+        <div class="security-notice">
+          <span class="notice-icon">🛡️</span>
+          <span>These files will be stored in a protected folder inaccessible to the AI agent</span>
+        </div>
+      </section>
+
+      <!-- Step 4: Testing Rubric -->
+      <section class="form-section" data-step="4">
+        <div class="section-header">
+          <div class="step-indicator">
+            <span class="step-number">4</span>
+          </div>
+          <div class="step-info">
+            <h2 class="section-title">Testing Rubric</h2>
+            <p class="section-subtitle">Define how the AI's work will be evaluated (minimum 3 categories)</p>
+          </div>
+        </div>
+
+        <div class="rubric-container" id="rubricContainer">
+          <!-- Rubric items will be added here -->
+        </div>
+
+        <button type="button" class="add-rubric-btn" id="addRubricBtn">
+          <span class="btn-icon">+</span>
+          <span>Add Rubric Category</span>
+        </button>
+      </section>
+
+      <!-- Time Estimates -->
+      <section class="form-section compact">
+        <div class="section-header inline">
+          <h2 class="section-title">Time Estimates</h2>
+        </div>
+
+        <div class="time-grid">
+          <div class="form-group">
+            <label class="form-label" for="expertTime">
+              <span class="label-icon">🎯</span>
+              Expert Time (minutes)
+            </label>
+            <input type="number" id="expertTime" class="form-input" min="1" max="480" value="15" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="juniorTime">
+              <span class="label-icon">📚</span>
+              Junior Time (minutes)
+            </label>
+            <input type="number" id="juniorTime" class="form-input" min="1" max="480" value="45" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="difficulty">
+              <span class="label-icon">📊</span>
+              Difficulty
+            </label>
+            <div class="select-wrapper">
+              <select id="difficulty" class="form-select" required>
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+              <span class="select-arrow">▼</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Submit Button -->
+      <div class="form-actions">
+        <button type="button" class="preview-btn" id="previewBtn">
+          <span class="btn-icon">👁️</span>
+          Preview Task
+        </button>
+        <button type="submit" class="submit-btn" id="generateBtn">
+          <span class="btn-icon">⚡</span>
+          Generate Task Package
+        </button>
+      </div>
+    </form>
+
+    <!-- Preview Modal -->
+    <div class="modal" id="previewModal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2>Task Preview</h2>
+          <button class="modal-close" id="closePreview">&times;</button>
+        </div>
+        <div class="modal-body">
+          <div class="preview-tabs">
+            <button class="tab-btn active" data-tab="yaml">task.yaml</button>
+            <button class="tab-btn" data-tab="solution">solution.sh</button>
+            <button class="tab-btn" data-tab="structure">File Structure</button>
+          </div>
+          <div class="preview-content">
+            <pre class="code-preview" id="yamlPreview"></pre>
+            <pre class="code-preview hidden" id="solutionPreview"></pre>
+            <div class="structure-preview hidden" id="structurePreview"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="download-btn" id="downloadBtn">
+            <span class="btn-icon">📦</span>
+            Download ZIP
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
