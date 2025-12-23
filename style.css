@@ -105,7 +105,7 @@ body {
   height: 100%;
   z-index: 0;
   overflow: hidden;
-  background-color: #09090f;
+  background-color: #0a0a12;
 }
 
 /* Clean dot grid pattern */
@@ -116,50 +116,52 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: radial-gradient(rgba(168, 85, 247, 0.15) 1px, transparent 1px);
-  background-size: 40px 40px;
+  background-image: radial-gradient(circle at center, rgba(168, 85, 247, 0.4) 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
   pointer-events: none;
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(120px);
-  opacity: 0.25;
+  filter: blur(100px);
+  opacity: 0.4;
   animation: float 25s infinite ease-in-out;
+  will-change: transform;
 }
 
 .orb1 {
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, var(--purple), transparent);
-  top: -250px;
-  left: -200px;
+  background: var(--purple);
+  top: -150px;
+  left: -100px;
 }
 
 .orb2 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, var(--blue), transparent);
-  bottom: -200px;
-  right: -150px;
+  background: var(--blue);
+  bottom: -100px;
+  right: -50px;
   animation-delay: -8s;
 }
 
 .orb3 {
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, var(--cyan), transparent);
-  top: 40%;
-  left: 60%;
+  width: 450px;
+  height: 450px;
+  background: var(--cyan);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   animation-delay: -16s;
 }
 
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(80px, -80px) scale(1.05); }
-  50% { transform: translate(-60px, 60px) scale(0.95); }
-  75% { transform: translate(40px, 40px) scale(1.02); }
+  25% { transform: translate(60px, -60px) scale(1.05); }
+  50% { transform: translate(-40px, 40px) scale(0.95); }
+  75% { transform: translate(30px, 30px) scale(1.02); }
 }
 
 
