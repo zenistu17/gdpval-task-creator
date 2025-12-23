@@ -1150,14 +1150,13 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .form-actions {
   display: flex;
-  justify-content: center;
   gap: 20px;
   padding-top: 24px;
   padding-bottom: 16px;
 }
 
 .btn-wide {
-  min-width: 200px;
+  flex: 1;
   padding: 16px 32px;
 }
 
