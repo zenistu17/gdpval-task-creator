@@ -1,140 +1,167 @@
-/* ========================================
+/* ============================================
    GDPVal Task Creator - World-Class UI
-   ======================================== */
+   Glassmorphism + Neon + New Layout
+   ============================================ */
 
-/* CSS Variables */
+/* Global Reset */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 :root {
-  --bg-primary: #0a0a0f;
-  --bg-secondary: #12121a;
-  --bg-card: rgba(20, 20, 30, 0.6);
-  --bg-card-hover: rgba(30, 30, 45, 0.7);
-  --bg-input: rgba(15, 15, 25, 0.8);
+  /* Dark Theme Colors */
+  --bg-dark: #0d0d1a;
+  --bg-darker: #070710;
+  --bg-card: rgba(255, 255, 255, 0.04);
 
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --border-medium: rgba(255, 255, 255, 0.1);
-  --border-accent: rgba(99, 102, 241, 0.3);
+  /* Glass Effects */
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-hover: rgba(255, 255, 255, 0.1);
 
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
-  --text-hint: #475569;
-
-  --accent-primary: #6366f1;
-  --accent-secondary: #8b5cf6;
-  --accent-glow: rgba(99, 102, 241, 0.4);
-
-  --success: #10b981;
+  /* Accent Colors */
+  --purple: #a855f7;
+  --purple-light: #c084fc;
+  --purple-dark: #7c3aed;
+  --blue: #3b82f6;
+  --cyan: #06b6d4;
   --green: #10b981;
-  --success-glow: rgba(16, 185, 129, 0.3);
-  --warning: #f59e0b;
-  --error: #ef4444;
+  --emerald: #34d399;
   --red: #ef4444;
+  --yellow: #f59e0b;
+  --orange: #f97316;
+  --pink: #ec4899;
 
-  --easy: #10b981;
-  --medium: #f59e0b;
-  --hard: #ef4444;
+  /* Neon Colors */
+  --neon-purple: #bf7fff;
+  --neon-cyan: #00ffff;
+  --neon-green: #39ff14;
+  --neon-pink: #ff6ec7;
+  --neon-blue: #00d4ff;
 
+  /* Text Colors - BRIGHT & VISIBLE */
+  --text-primary: #ffffff;
+  --text-secondary: #e2e8f0;
+  --text-muted: #cbd5e1;
+  --text-dim: #94a3b8;
+
+  /* Glows */
+  --glow-purple: 0 0 60px rgba(168, 85, 247, 0.4);
+  --glow-blue: 0 0 60px rgba(59, 130, 246, 0.4);
+  --glow-cyan: 0 0 60px rgba(6, 182, 212, 0.4);
+  --glow-green: 0 0 60px rgba(16, 185, 129, 0.4);
+
+  /* Neon Glows */
+  --neon-glow-purple: 0 0 5px #a855f7, 0 0 20px #a855f7, 0 0 40px rgba(168, 85, 247, 0.5);
+  --neon-glow-cyan: 0 0 5px #06b6d4, 0 0 20px #06b6d4, 0 0 40px rgba(6, 182, 212, 0.5);
+  --neon-glow-green: 0 0 5px #10b981, 0 0 20px #10b981, 0 0 40px rgba(16, 185, 129, 0.5);
+
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, #a855f7 0%, #3b82f6 50%, #06b6d4 100%);
+  --gradient-success: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  --gradient-card: linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(59, 130, 246, 0.05) 100%);
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 4px 30px rgba(168, 85, 247, 0.3);
+
+  /* Border Radius */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-xl: 24px;
 
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 40px var(--accent-glow);
+  /* Transitions */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
-  --transition-slow: 400ms ease;
-}
-
-/* Reset & Base */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
   font-family: var(--font-sans);
-  background: var(--bg-primary);
+  background: var(--bg-dark);
   color: var(--text-primary);
-  line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  line-height: 1.6;
 }
 
-/* Animated Background */
+/* ============================================
+   Animated Background
+   ============================================ */
+
 .animated-bg {
   position: fixed;
-  inset: 0;
-  z-index: -1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #0d0d15 50%, var(--bg-secondary) 100%);
+  background: linear-gradient(135deg, #0d0d1a 0%, #1a102e 50%, #0d0d1a 100%);
 }
 
 .orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(80px);
-  opacity: 0.5;
-  animation: float 20s ease-in-out infinite;
+  filter: blur(120px);
+  opacity: 0.25;
+  animation: float 25s infinite ease-in-out;
 }
 
 .orb1 {
   width: 600px;
   height: 600px;
-  background: radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%);
-  top: -200px;
-  left: -100px;
-  animation-delay: 0s;
+  background: radial-gradient(circle, var(--purple), transparent);
+  top: -250px;
+  left: -250px;
 }
 
 .orb2 {
   width: 500px;
   height: 500px;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.25) 0%, transparent 70%);
-  top: 50%;
-  right: -150px;
-  animation-delay: -7s;
+  background: radial-gradient(circle, var(--blue), transparent);
+  bottom: -200px;
+  right: -200px;
+  animation-delay: -8s;
 }
 
 .orb3 {
   width: 400px;
   height: 400px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.2) 0%, transparent 70%);
-  bottom: -100px;
-  left: 30%;
-  animation-delay: -14s;
+  background: radial-gradient(circle, var(--cyan), transparent);
+  top: 40%;
+  left: 60%;
+  animation-delay: -16s;
 }
 
 @keyframes float {
   0%, 100% { transform: translate(0, 0) scale(1); }
-  25% { transform: translate(50px, -30px) scale(1.05); }
-  50% { transform: translate(-20px, 40px) scale(0.95); }
-  75% { transform: translate(-40px, -20px) scale(1.02); }
+  25% { transform: translate(80px, -80px) scale(1.05); }
+  50% { transform: translate(-60px, 60px) scale(0.95); }
+  75% { transform: translate(40px, 40px) scale(1.02); }
 }
 
-/* Sticky Header */
+/* ============================================
+   Sticky Header
+   ============================================ */
+
 .sticky-header {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   z-index: 100;
-  background: rgba(10, 10, 15, 0.85);
+  background: rgba(13, 13, 26, 0.85);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
 }
 
 .header-inner {
@@ -166,10 +193,12 @@ body {
 }
 
 .logo-text {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-weight: 800;
+  text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
 }
 
 .progress-wrapper {
@@ -183,7 +212,7 @@ body {
 .progress-bar {
   flex: 1;
   height: 6px;
-  background: var(--bg-input);
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -191,17 +220,18 @@ body {
 .progress-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+  background: var(--gradient-primary);
   border-radius: 3px;
-  transition: width var(--transition-normal);
-  box-shadow: 0 0 10px var(--accent-glow);
+  transition: width 0.5s var(--ease-out);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
 }
 
 .progress-text {
   font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--cyan);
   min-width: 40px;
+  text-shadow: 0 0 10px var(--cyan);
 }
 
 .header-preview-btn {
@@ -209,80 +239,151 @@ body {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-medium);
+  background: var(--glass-bg);
+  border: 1px solid var(--purple);
   border-radius: var(--radius-sm);
-  color: var(--text-secondary);
+  color: var(--text-primary);
   font-size: 0.875rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
 }
 
 .header-preview-btn:hover {
-  background: var(--bg-card-hover);
-  color: var(--text-primary);
-  border-color: var(--border-accent);
+  background: rgba(168, 85, 247, 0.2);
+  border-color: var(--purple-light);
+  box-shadow: var(--neon-glow-purple);
+  transform: translateY(-2px);
 }
 
 .kbd {
   padding: 2px 6px;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(168, 85, 247, 0.3);
   border-radius: 4px;
   font-size: 0.75rem;
   font-family: var(--font-mono);
+  color: var(--purple-light);
 }
 
-/* Main Content */
+/* ============================================
+   Main Content
+   ============================================ */
+
 .main-content {
+  position: relative;
+  z-index: 1;
   max-width: 1600px;
   margin: 0 auto;
   padding: 100px 40px 60px;
 }
 
-/* Hero Section */
+/* ============================================
+   Hero Section
+   ============================================ */
+
 .hero {
   text-align: center;
   margin-bottom: 60px;
+  animation: fadeSlideDown 0.8s var(--ease-out);
 }
 
 .hero-title {
   font-size: 3.5rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   margin-bottom: 12px;
+  text-shadow: 0 0 60px rgba(168, 85, 247, 0.5);
 }
 
 .hero-subtitle {
   font-size: 1.25rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: 400;
 }
 
-/* Form Layout */
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   Form Layout
+   ============================================ */
+
 .task-form {
   display: grid;
   gap: 32px;
 }
 
-/* Form Section */
+/* ============================================
+   Form Section - Glass Cards with Neon
+   ============================================ */
+
 .form-section {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 32px;
-  backdrop-filter: blur(10px);
-  transition: all var(--transition-normal);
+  transition: all 0.4s var(--ease-out);
+  animation: fadeSlideUp 0.6s var(--ease-out) backwards;
+  position: relative;
+  overflow: hidden;
+}
+
+.form-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .form-section:hover {
-  border-color: var(--border-medium);
-  box-shadow: var(--shadow-md);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.2), 0 8px 40px rgba(0, 0, 0, 0.3);
+  transform: translateY(-4px);
 }
+
+.form-section:hover::before {
+  opacity: 1;
+}
+
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.form-section:nth-child(1) { animation-delay: 0.1s; }
+.form-section:nth-child(2) { animation-delay: 0.2s; }
+.form-section:nth-child(3) { animation-delay: 0.3s; }
+.form-section:nth-child(4) { animation-delay: 0.4s; }
+.form-section:nth-child(5) { animation-delay: 0.5s; }
+
+/* ============================================
+   Section Badge - Neon Style
+   ============================================ */
 
 .section-badge {
   display: inline-flex;
@@ -290,9 +391,10 @@ body {
   gap: 10px;
   margin-bottom: 24px;
   padding: 6px 16px 6px 8px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
-  border: 1px solid var(--border-accent);
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid var(--purple);
   border-radius: 100px;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
 }
 
 .badge-number {
@@ -301,19 +403,20 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: var(--gradient-primary);
   border-radius: 50%;
   font-size: 0.875rem;
   font-weight: 700;
   color: white;
+  box-shadow: 0 0 15px rgba(168, 85, 247, 0.5);
 }
 
 .badge-label {
   font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
 }
 
 .section-content {
@@ -321,20 +424,28 @@ body {
   gap: 24px;
 }
 
-/* Input Groups */
+/* ============================================
+   Input Groups
+   ============================================ */
+
 .input-group {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.input-label {
-  font-size: 0.875rem;
+.input-label,
+.form-label {
+  font-size: 0.9rem;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--text-primary);
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.label-icon {
+  font-size: 1.1rem;
 }
 
 .input-row {
@@ -349,35 +460,39 @@ body {
   }
 }
 
-/* Text Input */
+/* ============================================
+   Text Input - Neon Borders
+   ============================================ */
+
 .text-input,
 .form-input {
   width: 100%;
   padding: 14px 18px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 1rem;
   font-family: var(--font-sans);
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .text-input:hover,
 .form-input:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
 .text-input:focus,
 .form-input:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--purple);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .text-input::placeholder,
 .form-input::placeholder {
-  color: var(--text-hint);
+  color: var(--text-dim);
 }
 
 .input-hint {
@@ -385,7 +500,10 @@ body {
   color: var(--text-muted);
 }
 
-/* Select Input */
+/* ============================================
+   Select Input
+   ============================================ */
+
 .select-wrapper {
   position: relative;
 }
@@ -393,30 +511,35 @@ body {
 .select-input {
   width: 100%;
   padding: 14px 44px 14px 18px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 1rem;
   font-family: var(--font-sans);
   cursor: pointer;
   appearance: none;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .select-input:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
 .select-input:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--purple);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
 }
 
 .select-input:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.select-input option {
+  background: var(--bg-dark);
+  color: var(--text-primary);
 }
 
 .select-chevron {
@@ -426,15 +549,18 @@ body {
   transform: translateY(-50%);
   width: 20px;
   height: 20px;
-  color: var(--text-muted);
+  color: var(--purple-light);
   pointer-events: none;
 }
 
-/* Difficulty Toggle */
+/* ============================================
+   Difficulty Toggle - Neon Segmented
+   ============================================ */
+
 .difficulty-toggle {
   display: flex;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 4px;
   gap: 4px;
@@ -453,61 +579,68 @@ body {
   padding: 12px 20px;
   border-radius: var(--radius-sm);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
+  border: 1px solid transparent;
 }
 
 .difficulty-option:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .diff-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: currentColor;
   opacity: 0.5;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
-/* Difficulty States */
+/* Difficulty States - Neon Glow */
 input#diffEasy:checked + .difficulty-option {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--easy);
-  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.2);
+  color: var(--emerald);
+  border-color: var(--green);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
 }
 
 input#diffEasy:checked + .difficulty-option .diff-dot {
   opacity: 1;
-  box-shadow: 0 0 8px var(--easy);
+  box-shadow: 0 0 10px var(--green), 0 0 20px var(--green);
 }
 
 input#diffMedium:checked + .difficulty-option {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--medium);
-  box-shadow: inset 0 0 0 1px rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.2);
+  color: var(--yellow);
+  border-color: var(--yellow);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.4);
 }
 
 input#diffMedium:checked + .difficulty-option .diff-dot {
   opacity: 1;
-  box-shadow: 0 0 8px var(--medium);
+  box-shadow: 0 0 10px var(--yellow), 0 0 20px var(--yellow);
 }
 
 input#diffHard:checked + .difficulty-option {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--hard);
-  box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.2);
+  color: #ff6b6b;
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4);
 }
 
 input#diffHard:checked + .difficulty-option .diff-dot {
   opacity: 1;
-  box-shadow: 0 0 8px var(--hard);
+  box-shadow: 0 0 10px var(--red), 0 0 20px var(--red);
 }
 
-/* Textarea */
+/* ============================================
+   Textarea
+   ============================================ */
+
 .textarea-wrapper {
   position: relative;
 }
@@ -516,8 +649,8 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .form-textarea {
   width: 100%;
   padding: 16px 18px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: 1rem;
@@ -525,24 +658,24 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   line-height: 1.6;
   resize: vertical;
   min-height: 200px;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .textarea-input:hover,
 .form-textarea:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(168, 85, 247, 0.5);
 }
 
 .textarea-input:focus,
 .form-textarea:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--purple);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
 }
 
 .textarea-input::placeholder,
 .form-textarea::placeholder {
-  color: var(--text-hint);
+  color: var(--text-dim);
 }
 
 .textarea-footer {
@@ -555,13 +688,17 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .char-count {
   font-family: var(--font-mono);
+  color: var(--cyan);
 }
 
 .char-min {
-  color: var(--text-hint);
+  color: var(--text-dim);
 }
 
-/* Upload Grid */
+/* ============================================
+   Upload Grid
+   ============================================ */
+
 .upload-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -574,22 +711,31 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   }
 }
 
-/* Upload Card */
+/* ============================================
+   Upload Card - Glass with Neon
+   ============================================ */
+
 .upload-card {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 20px;
-  transition: all var(--transition-normal);
+  transition: all 0.3s var(--ease-out);
 }
 
 .upload-card:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(6, 182, 212, 0.5);
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.2);
 }
 
 .upload-card.solution {
-  border-color: rgba(139, 92, 246, 0.2);
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), transparent);
+  border-color: rgba(168, 85, 247, 0.3);
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.08), transparent);
+}
+
+.upload-card.solution:hover {
+  border-color: var(--purple);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.3);
 }
 
 .upload-header {
@@ -605,7 +751,7 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .upload-title {
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 2px;
 }
@@ -618,31 +764,36 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .required-badge {
   margin-left: auto;
   padding: 4px 10px;
-  background: rgba(139, 92, 246, 0.2);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid var(--purple);
   border-radius: 100px;
   font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--accent-secondary);
+  font-weight: 700;
+  color: var(--purple-light);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
 }
 
-/* Upload Zone */
+/* ============================================
+   Upload Zone - Neon Dashed Border
+   ============================================ */
+
 .upload-zone {
   position: relative;
-  border: 2px dashed var(--border-medium);
+  border: 2px dashed rgba(6, 182, 212, 0.4);
   border-radius: var(--radius-md);
   padding: 32px 20px;
   text-align: center;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .upload-zone:hover,
 .upload-zone.dragover {
-  border-color: var(--accent-primary);
-  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--cyan);
+  background: rgba(6, 182, 212, 0.1);
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
 }
 
 .upload-zone input[type="file"] {
@@ -664,20 +815,25 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .upload-svg {
   width: 32px;
   height: 32px;
-  opacity: 0.5;
+  color: var(--cyan);
+  opacity: 0.7;
 }
 
 .solution-zone {
-  border-color: rgba(139, 92, 246, 0.3);
+  border-color: rgba(168, 85, 247, 0.4);
 }
 
 .solution-zone:hover,
 .solution-zone.dragover {
-  border-color: var(--accent-secondary);
-  background: rgba(139, 92, 246, 0.05);
+  border-color: var(--purple);
+  background: rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 30px rgba(168, 85, 247, 0.3);
 }
 
-/* File List */
+/* ============================================
+   File List
+   ============================================ */
+
 .file-list {
   display: flex;
   flex-direction: column;
@@ -690,21 +846,23 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-subtle);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.file-item:hover {
+  border-color: rgba(6, 182, 212, 0.4);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .file-icon {
   font-size: 1.25rem;
 }
 
-.file-info {
-  flex: 1;
-  min-width: 0;
-}
-
 .file-name {
+  flex: 1;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text-primary);
@@ -715,9 +873,8 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .file-size {
   font-size: 0.75rem;
-  color: var(--text-muted);
-  margin-left: auto;
-  flex-shrink: 0;
+  color: var(--cyan);
+  font-family: var(--font-mono);
 }
 
 .file-remove {
@@ -732,36 +889,41 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   color: var(--text-muted);
   cursor: pointer;
   font-size: 1.25rem;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .file-remove:hover {
   background: rgba(239, 68, 68, 0.2);
-  color: var(--error);
+  color: var(--red);
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
 .upload-formats {
   margin-top: 12px;
   font-size: 0.75rem;
-  color: var(--text-hint);
+  color: var(--text-dim);
 }
 
-/* Time Section */
+/* ============================================
+   Time Section
+   ============================================ */
+
 .time-notice {
   display: flex;
   align-items: flex-start;
   gap: 14px;
   padding: 16px 20px;
   background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.4);
   border-radius: var(--radius-md);
   margin-bottom: 8px;
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
 }
 
 .notice-icon {
   width: 24px;
   height: 24px;
-  color: var(--warning);
+  color: var(--yellow);
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -769,7 +931,7 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .time-notice strong {
   display: block;
   font-size: 0.95rem;
-  color: var(--warning);
+  color: var(--yellow);
   margin-bottom: 4px;
 }
 
@@ -804,20 +966,20 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .time-input-wrapper {
   display: flex;
   align-items: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .time-input-wrapper:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(6, 182, 212, 0.5);
 }
 
 .time-input-wrapper:focus-within {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--cyan);
+  box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
 }
 
 .time-input {
@@ -843,14 +1005,17 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .time-suffix {
   padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--cyan);
   font-size: 0.9rem;
-  font-weight: 500;
-  border-left: 1px solid var(--border-subtle);
+  font-weight: 600;
+  border-left: 1px solid var(--glass-border);
 }
 
-/* Rubric Section */
+/* ============================================
+   Rubric Section
+   ============================================ */
+
 .rubric-intro {
   color: var(--text-secondary);
   font-size: 0.95rem;
@@ -870,14 +1035,15 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   gap: 16px;
   align-items: start;
   padding: 20px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .rubric-item:hover {
-  border-color: var(--border-medium);
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
 }
 
 @media (max-width: 700px) {
@@ -893,27 +1059,11 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   gap: 8px;
 }
 
-.rubric-item .form-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.label-icon {
-  font-size: 1rem;
-}
-
-.rubric-item .form-input {
-  font-size: 0.95rem;
-}
-
 .rubric-points .form-input {
   text-align: center;
   font-family: var(--font-mono);
   font-weight: 600;
+  color: var(--cyan);
 }
 
 .rubric-remove {
@@ -923,19 +1073,20 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
   font-size: 1.5rem;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
   margin-top: 28px;
 }
 
 .rubric-remove:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: var(--error);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .add-rubric-btn {
@@ -946,19 +1097,20 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   width: 100%;
   padding: 14px 20px;
   background: transparent;
-  border: 2px dashed var(--border-medium);
+  border: 2px dashed rgba(168, 85, 247, 0.4);
   border-radius: var(--radius-md);
   color: var(--text-muted);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
 }
 
 .add-rubric-btn:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--purple);
+  color: var(--purple-light);
+  background: rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.25);
 }
 
 .add-rubric-btn svg {
@@ -969,18 +1121,22 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .rubric-total {
   text-align: right;
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-weight: 700;
+  color: var(--text-primary);
   padding-top: 8px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 
 .rubric-total span {
   font-family: var(--font-mono);
-  color: var(--accent-primary);
+  color: var(--cyan);
+  text-shadow: 0 0 10px var(--cyan);
 }
 
-/* Form Actions */
+/* ============================================
+   Form Actions
+   ============================================ */
+
 .form-actions {
   display: flex;
   justify-content: flex-end;
@@ -988,7 +1144,10 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   padding-top: 16px;
 }
 
-/* Buttons */
+/* ============================================
+   Buttons - Neon Style
+   ============================================ */
+
 .btn {
   display: inline-flex;
   align-items: center;
@@ -997,10 +1156,10 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   padding: 14px 28px;
   border-radius: var(--radius-md);
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: 700;
   font-family: var(--font-sans);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.3s var(--ease-out);
   border: none;
 }
 
@@ -1014,26 +1173,27 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 }
 
 .btn-secondary {
-  background: var(--bg-input);
-  border: 1px solid var(--border-medium);
-  color: var(--text-secondary);
+  background: var(--glass-bg);
+  border: 1px solid var(--cyan);
+  color: var(--text-primary);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
 }
 
 .btn-secondary:hover {
-  background: var(--bg-card-hover);
-  color: var(--text-primary);
-  border-color: var(--accent-primary);
+  background: rgba(6, 182, 212, 0.2);
+  box-shadow: var(--neon-glow-cyan);
+  transform: translateY(-3px);
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 4px 15px var(--accent-glow);
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.4);
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px var(--accent-glow);
+  transform: translateY(-3px);
+  box-shadow: 0 0 10px var(--purple), 0 0 30px rgba(168, 85, 247, 0.5), 0 8px 30px rgba(168, 85, 247, 0.4);
 }
 
 .btn-primary:active {
@@ -1047,17 +1207,20 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 }
 
 .btn-success {
-  background: linear-gradient(135deg, var(--success), #059669);
+  background: var(--gradient-success);
   color: white;
-  box-shadow: 0 4px 15px var(--success-glow);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
 }
 
 .btn-success:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px var(--success-glow);
+  transform: translateY(-3px);
+  box-shadow: 0 0 10px var(--green), 0 0 30px rgba(16, 185, 129, 0.5), 0 8px 30px rgba(16, 185, 129, 0.4);
 }
 
-/* Modal */
+/* ============================================
+   Modal - Glass with Neon
+   ============================================ */
+
 .modal {
   position: fixed;
   inset: 0;
@@ -1068,7 +1231,7 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   padding: 20px;
   opacity: 0;
   visibility: hidden;
-  transition: all var(--transition-normal);
+  transition: all 0.3s var(--ease-out);
 }
 
 .modal.active {
@@ -1079,8 +1242,8 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .modal-backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
 }
 
 .modal-content {
@@ -1088,14 +1251,14 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   width: 100%;
   max-width: 800px;
   max-height: 85vh;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-medium);
+  background: linear-gradient(135deg, rgba(20, 20, 40, 0.95), rgba(10, 10, 25, 0.95));
+  border: 1px solid var(--purple);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 0 50px rgba(168, 85, 247, 0.3), var(--shadow-lg);
   display: flex;
   flex-direction: column;
   transform: scale(0.95) translateY(20px);
-  transition: transform var(--transition-normal);
+  transition: transform 0.3s var(--ease-out);
 }
 
 .modal.active .modal-content {
@@ -1107,7 +1270,7 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   justify-content: space-between;
   padding: 20px 24px;
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .modal-header h2 {
@@ -1116,6 +1279,7 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   display: flex;
   align-items: center;
   gap: 10px;
+  color: var(--text-primary);
 }
 
 .modal-close {
@@ -1125,17 +1289,18 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   justify-content: center;
   background: transparent;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .modal-close:hover {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: var(--error);
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--red);
+  color: var(--red);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
 }
 
 .modal-close svg {
@@ -1150,36 +1315,41 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   flex-direction: column;
 }
 
-/* Preview Tabs */
+/* ============================================
+   Preview Tabs
+   ============================================ */
+
 .preview-tabs {
   display: flex;
   gap: 4px;
   padding: 12px 24px;
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .tab-btn {
   padding: 10px 20px;
   background: transparent;
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--radius-sm);
   color: var(--text-muted);
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   font-family: var(--font-mono);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .tab-btn:hover {
-  color: var(--text-secondary);
-  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tab-btn.active {
-  color: var(--text-primary);
-  background: var(--bg-card);
+  color: var(--cyan);
+  background: rgba(6, 182, 212, 0.1);
+  border-color: var(--cyan);
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
 }
 
 .preview-content {
@@ -1211,10 +1381,11 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .tree-item {
   padding: 4px 0;
+  color: var(--text-secondary);
 }
 
 .tree-item.folder {
-  color: var(--accent-primary);
+  color: var(--cyan);
 }
 
 .hidden {
@@ -1225,10 +1396,13 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   display: flex;
   justify-content: flex-end;
   padding: 16px 24px;
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--glass-border);
 }
 
-/* Success Modal */
+/* ============================================
+   Success Modal
+   ============================================ */
+
 .success-modal {
   max-width: 420px;
   text-align: center;
@@ -1242,9 +1416,10 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   justify-content: center;
   margin: 0 auto 24px;
-  background: linear-gradient(135deg, var(--success), #059669);
+  background: var(--gradient-success);
   border-radius: 50%;
   animation: scaleIn 0.4s ease;
+  box-shadow: 0 0 30px rgba(16, 185, 129, 0.5);
 }
 
 @keyframes scaleIn {
@@ -1258,23 +1433,18 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   height: 40px;
   color: white;
   stroke-width: 3;
-  animation: checkDraw 0.5s ease 0.2s both;
-}
-
-@keyframes checkDraw {
-  0% { stroke-dasharray: 0 100; }
-  100% { stroke-dasharray: 100 0; }
 }
 
 .success-modal h2 {
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 24px;
+  color: var(--text-primary);
 }
 
 .success-task-id {
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 16px;
   margin-bottom: 16px;
@@ -1293,8 +1463,9 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .success-task-id code {
   font-family: var(--font-mono);
   font-size: 1rem;
-  color: var(--accent-primary);
+  color: var(--cyan);
   font-weight: 600;
+  text-shadow: 0 0 10px var(--cyan);
 }
 
 .db-status {
@@ -1303,7 +1474,10 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   margin-bottom: 24px;
 }
 
-/* Toast Notifications */
+/* ============================================
+   Toast Notifications
+   ============================================ */
+
 .toast-container {
   position: fixed;
   bottom: 24px;
@@ -1319,16 +1493,12 @@ input#diffHard:checked + .difficulty-option .diff-dot {
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-medium);
+  background: rgba(20, 20, 40, 0.95);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  animation: slideIn 0.3s ease;
-}
-
-@keyframes slideIn {
-  0% { transform: translateX(100%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  box-shadow: var(--shadow-lg);
+  animation: toastSlideIn 0.4s var(--ease-out);
+  backdrop-filter: blur(10px);
 }
 
 @keyframes toastSlideIn {
@@ -1337,11 +1507,13 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 }
 
 .toast.success {
-  border-color: rgba(16, 185, 129, 0.3);
+  border-color: var(--green);
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
 }
 
 .toast.error {
-  border-color: rgba(239, 68, 68, 0.3);
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
 }
 
 .toast-icon {
@@ -1351,53 +1523,50 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 .toast-message {
   font-size: 0.9rem;
   color: var(--text-primary);
+  font-weight: 500;
 }
 
-/* Utility Classes */
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
+/* ============================================
+   Scrollbar Styling
+   ============================================ */
 
-/* Scrollbar Styling */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-input);
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--border-medium);
+  background: rgba(168, 85, 247, 0.3);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-hint);
+  background: rgba(168, 85, 247, 0.5);
 }
 
-/* Focus Visible */
+/* ============================================
+   Focus & Selection
+   ============================================ */
+
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--purple);
   outline-offset: 2px;
 }
 
-/* Selection */
 ::selection {
-  background: var(--accent-primary);
+  background: var(--purple);
   color: white;
 }
 
-/* Responsive adjustments */
+/* ============================================
+   Responsive
+   ============================================ */
+
 @media (max-width: 480px) {
   .header-inner {
     padding: 0 16px;
