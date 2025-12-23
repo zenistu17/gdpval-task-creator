@@ -556,9 +556,8 @@ function generateTaskYaml() {
 Rubric: ${totalPoints} points
 ${rubricStr}`;
 
-  // Generate YAML
-  const yaml = `task_name: ${taskName}
-instruction: |-
+  // Generate YAML (task_name not included - stored separately in DB)
+  const yaml = `instruction: |-
 ${fullInstruction.split('\n').map(line => '  ' + line).join('\n')}
 difficulty: ${difficulty}
 category: gdpval
@@ -584,28 +583,13 @@ function generateSolutionSh() {
   const solutionFiles = state.solutionFiles.map(f => f.name);
 
   let script = `#!/bin/bash
-
-# GDPVal Task Solution Script
-# This script sets up the solution environment and runs the solution files
-
 set -e
-
-echo "Setting up solution environment..."
-
-# Create solution output directory
 mkdir -p /app/output
-
-# Copy solution files from protected directory
 `;
 
   solutionFiles.forEach(file => {
-    script += `cp /solution/${file} /app/output/ 2>/dev/null || echo "Note: ${file} not found in solution directory"\n`;
+    script += `cp /solution/${file} /app/output/\n`;
   });
-
-  script += `
-echo "Solution files prepared in /app/output/"
-echo "Solution execution complete."
-`;
 
   return script;
 }
@@ -904,7 +888,7 @@ async function saveToDatabase(taskId) {
 async function generateAndDownload() {
   if (!validateForm()) return;
 
-  const btn = document.getElementById('generateBtn');
+  const btn = document.getElementById('submitBtn');
   const originalText = btn.innerHTML;
   btn.innerHTML = '<span class="btn-icon">⏳</span> Generating...';
   btn.disabled = true;
