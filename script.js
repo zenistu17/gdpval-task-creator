@@ -661,29 +661,32 @@ function showPreview() {
 }
 
 function generateStructurePreview() {
-  const taskId = generateTaskId();
+  // Generate and cache task ID for consistency between preview and submit
+  state.currentTaskId = generateTaskId();
 
   let html = `<div class="structure-tree">
-    <div class="tree-item folder">📁 ${taskId}/</div>
-    <div class="tree-item file">📄 task.yaml</div>
-    <div class="tree-item file">📄 solution.sh</div>`;
+    <div class="tree-item folder">📁 ${state.currentTaskId}/</div>
+    <div class="tree-item file" style="padding-left: 1.5rem;">├── 📄 task.yaml</div>
+    <div class="tree-item file" style="padding-left: 1.5rem;">├── 📄 solution.sh</div>`;
 
   if (state.referenceFiles.length > 0) {
-    html += `<div class="tree-item folder">📁 data/</div>`;
-    html += `<div class="tree-item file" style="padding-left: 2.5rem;">📋 metadata.json</div>`;
-    state.referenceFiles.forEach(f => {
+    html += `<div class="tree-item folder" style="padding-left: 1.5rem;">├── 📁 data/</div>`;
+    html += `<div class="tree-item file" style="padding-left: 3rem;">│   ├── 📋 metadata.json</div>`;
+    state.referenceFiles.forEach((f, i) => {
       const ext = f.name.split('.').pop().toLowerCase();
       const icon = FILE_ICONS[ext] || FILE_ICONS.default;
-      html += `<div class="tree-item file" style="padding-left: 2.5rem;">${icon} ${f.name}</div>`;
+      const prefix = i === state.referenceFiles.length - 1 ? '│   └──' : '│   ├──';
+      html += `<div class="tree-item file" style="padding-left: 3rem;">${prefix} ${icon} ${f.name}</div>`;
     });
   }
 
-  html += `<div class="tree-item folder" style="color: var(--green);">🔐 solution/</div>`;
-  html += `<div class="tree-item file" style="padding-left: 2.5rem; color: var(--green);">📋 metadata.json</div>`;
-  state.solutionFiles.forEach(f => {
+  html += `<div class="tree-item folder" style="padding-left: 1.5rem; color: var(--green);">└── 🔐 solution/</div>`;
+  html += `<div class="tree-item file" style="padding-left: 3rem; color: var(--green);">    ├── 📋 metadata.json</div>`;
+  state.solutionFiles.forEach((f, i) => {
     const ext = f.name.split('.').pop().toLowerCase();
     const icon = FILE_ICONS[ext] || FILE_ICONS.default;
-    html += `<div class="tree-item file" style="padding-left: 2.5rem; color: var(--green);">${icon} ${f.name}</div>`;
+    const prefix = i === state.solutionFiles.length - 1 ? '    └──' : '    ├──';
+    html += `<div class="tree-item file" style="padding-left: 3rem; color: var(--green);">${prefix} ${icon} ${f.name}</div>`;
   });
 
   html += '</div>';
@@ -694,6 +697,14 @@ function generateTaskId() {
   const taskName = document.getElementById('taskName').value.trim();
   const hash = Math.random().toString(36).slice(2, 8);
   return `${hash}_${taskName}`;
+}
+
+function getOrCreateTaskId() {
+  // Use cached ID if available (from preview), otherwise generate new one
+  if (!state.currentTaskId) {
+    state.currentTaskId = generateTaskId();
+  }
+  return state.currentTaskId;
 }
 
 // ============================================
@@ -895,7 +906,7 @@ async function generateAndDownload() {
 
   try {
     const zip = new JSZip();
-    const taskId = generateTaskId();
+    const taskId = getOrCreateTaskId();
     const folder = zip.folder(taskId);
 
     // Add core files (only task.yaml and solution.sh)
@@ -944,6 +955,9 @@ async function generateAndDownload() {
 
     // Show success modal
     showSuccessModal(taskId, dbResult);
+
+    // Reset cached task ID for next submission
+    state.currentTaskId = null;
 
   } catch (error) {
     console.error('Generation error:', error);

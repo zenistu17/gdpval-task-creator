@@ -215,6 +215,7 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
             <li><strong>Expert Time:</strong> How long would a seasoned professional with 10+ years experience take?</li>
             <li><strong>Junior Time:</strong> How long would someone new to the field (1-2 years experience) take?</li>
           </ul>
+          <p style="margin-top: 0.75rem; color: var(--yellow);"><strong>Note:</strong> Tasks must take at least 7 hours for an expert to complete.</p>
         </div>
 
         <div class="time-grid">
@@ -223,7 +224,7 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
               <span class="label-icon">🎯</span>
               Expert Time (hours)
             </label>
-            <input type="number" id="expertTime" class="form-input" min="0.25" max="40" step="0.25" value="0.5" required>
+            <input type="number" id="expertTime" class="form-input" min="7" max="40" step="0.5" value="7" required>
           </div>
 
           <div class="form-group">
@@ -231,7 +232,7 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
               <span class="label-icon">📚</span>
               Junior Time (hours)
             </label>
-            <input type="number" id="juniorTime" class="form-input" min="0.25" max="40" step="0.25" value="1.5" required>
+            <input type="number" id="juniorTime" class="form-input" min="7" max="40" step="0.5" value="10" required>
           </div>
 
           <div class="form-group">
