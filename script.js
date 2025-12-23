@@ -192,6 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeRubric();
   initializeFormSubmission();
   initializePreview();
+  initializeDifficultyToggle();
+  initializeKeyboardShortcuts();
   updateProgress();
 });
 
@@ -442,7 +444,11 @@ function getRubricData() {
 function updateProgress() {
   const form = document.getElementById('taskForm');
   let completed = 0;
-  let total = 6;
+  let total = 7;
+
+  // Task name
+  const taskName = document.getElementById('taskName').value.trim();
+  if (taskName && /^[a-z0-9-]+$/.test(taskName)) completed++;
 
   // Sector
   if (document.getElementById('sector').value) completed++;
@@ -466,6 +472,24 @@ function updateProgress() {
 
   const progress = Math.round((completed / total) * 100);
   document.getElementById('progressFill').style.width = `${progress}%`;
+
+  // Update progress text
+  const progressText = document.getElementById('progressText');
+  if (progressText) {
+    progressText.textContent = `${progress}%`;
+  }
+
+  // Update rubric total
+  updateRubricTotal();
+}
+
+function updateRubricTotal() {
+  const rubrics = getRubricData();
+  const total = rubrics.reduce((sum, r) => sum + r.points, 0);
+  const totalEl = document.getElementById('rubricTotal');
+  if (totalEl) {
+    totalEl.textContent = total;
+  }
 }
 
 // ============================================
@@ -535,7 +559,7 @@ function generateTaskYaml() {
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
-  const difficulty = document.getElementById('difficulty').value;
+  const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value || 'medium';
   // Time inputs are now in hours - convert to minutes for YAML
   const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
   const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
@@ -844,7 +868,7 @@ async function saveToDatabase(taskId) {
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
-  const difficulty = document.getElementById('difficulty').value;
+  const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value || 'medium';
   const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
   const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
   const rubrics = getRubricData();
@@ -1034,4 +1058,47 @@ function showToast(message, type = 'info') {
     toast.style.animation = 'toastSlideIn 0.4s reverse forwards';
     setTimeout(() => toast.remove(), 400);
   }, 4000);
+}
+
+// ============================================
+// Difficulty Toggle
+// ============================================
+
+function initializeDifficultyToggle() {
+  const difficultyInputs = document.querySelectorAll('input[name="difficulty"]');
+  difficultyInputs.forEach(input => {
+    input.addEventListener('change', updateProgress);
+  });
+}
+
+// ============================================
+// Keyboard Shortcuts
+// ============================================
+
+function initializeKeyboardShortcuts() {
+  // Header preview button
+  const headerPreviewBtn = document.getElementById('headerPreviewBtn');
+  if (headerPreviewBtn) {
+    headerPreviewBtn.addEventListener('click', () => {
+      if (validateForm()) {
+        showPreview();
+      }
+    });
+  }
+
+  // Keyboard shortcut: Cmd/Ctrl + P for preview
+  document.addEventListener('keydown', (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === 'p') {
+      e.preventDefault();
+      if (validateForm()) {
+        showPreview();
+      }
+    }
+  });
+
+  // Task name input - update progress on input
+  const taskNameInput = document.getElementById('taskName');
+  if (taskNameInput) {
+    taskNameInput.addEventListener('input', updateProgress);
+  }
 }

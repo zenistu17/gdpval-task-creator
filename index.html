@@ -15,304 +15,343 @@
     <div class="orb orb1"></div>
     <div class="orb orb2"></div>
     <div class="orb orb3"></div>
-    <div class="orb orb4"></div>
   </div>
 
-  <!-- Progress Indicator -->
-  <div class="progress-bar">
-    <div class="progress-fill" id="progressFill"></div>
-  </div>
-
-  <div class="container">
-    <!-- Header -->
-    <header class="header">
-      <div class="logo-badge">
+  <!-- Sticky Header with Progress -->
+  <header class="sticky-header">
+    <div class="header-inner">
+      <div class="logo">
         <span class="logo-icon">⚡</span>
         <span class="logo-text">GDPVal</span>
       </div>
-      <h1 class="header-title">Task Creator</h1>
-      <p class="header-subtitle">Build world-class AI evaluation tasks in minutes</p>
-    </header>
+      <div class="progress-wrapper">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <span class="progress-text" id="progressText">0%</span>
+      </div>
+      <button type="button" class="header-preview-btn" id="headerPreviewBtn">
+        <span>Preview</span>
+        <span class="kbd">⌘P</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="main-content">
+    <!-- Hero Section -->
+    <div class="hero">
+      <h1 class="hero-title">Task Creator</h1>
+      <p class="hero-subtitle">Build world-class AI evaluation tasks</p>
+    </div>
 
     <!-- Main Form -->
     <form id="taskForm" class="task-form">
-      <!-- Step 1: Task Details -->
-      <section class="form-section" data-step="1">
-        <div class="section-header">
-          <div class="step-indicator">
-            <span class="step-number">1</span>
-            <span class="step-line"></span>
-          </div>
-          <div class="step-info">
-            <h2 class="section-title">Task Details</h2>
-            <p class="section-subtitle">Define what the AI needs to accomplish</p>
-          </div>
+
+      <!-- Section 1: Identity -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">1</span>
+          <span class="badge-label">Identity</span>
         </div>
 
-        <!-- Task Name -->
-        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
-          <label class="form-label" for="taskName">
-            <span class="label-icon">🏷️</span>
-            Task Name
-          </label>
-          <input
-            type="text"
-            id="taskName"
-            class="form-input"
-            placeholder="e.g., quarterly-earnings-analysis, contract-review, patient-triage"
-            required
-          >
-          <span class="field-hint">A short, descriptive name for this task (lowercase, hyphens allowed)</span>
-        </div>
+        <div class="section-content">
+          <div class="input-group">
+            <label class="input-label" for="taskName">Task Name</label>
+            <input
+              type="text"
+              id="taskName"
+              class="text-input"
+              placeholder="quarterly-earnings-analysis"
+              required
+            >
+            <span class="input-hint">Lowercase, hyphens only (e.g., contract-review, patient-triage)</span>
+          </div>
 
-        <div class="form-grid">
-          <!-- Sector Dropdown -->
-          <div class="form-group">
-            <label class="form-label" for="sector">
-              <span class="label-icon">🏢</span>
-              Economic Sector
-            </label>
-            <div class="select-wrapper">
-              <select id="sector" class="form-select" required>
-                <option value="">Select a sector...</option>
-              </select>
-              <span class="select-arrow">▼</span>
+          <div class="input-row">
+            <div class="input-group">
+              <label class="input-label" for="sector">Sector</label>
+              <div class="select-wrapper">
+                <select id="sector" class="select-input" required>
+                  <option value="">Choose sector...</option>
+                </select>
+                <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
             </div>
-            <span class="field-hint">Choose the GDP sector this task belongs to</span>
+
+            <div class="input-group">
+              <label class="input-label" for="occupation">Occupation</label>
+              <div class="select-wrapper">
+                <select id="occupation" class="select-input" required disabled>
+                  <option value="">Select sector first...</option>
+                </select>
+                <svg class="select-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
           </div>
 
-          <!-- Occupation Dropdown -->
-          <div class="form-group">
-            <label class="form-label" for="occupation">
-              <span class="label-icon">👤</span>
-              Occupation
-            </label>
-            <div class="select-wrapper">
-              <select id="occupation" class="form-select" required disabled>
-                <option value="">Select a sector first...</option>
-              </select>
-              <span class="select-arrow">▼</span>
+          <div class="input-group">
+            <label class="input-label">Difficulty</label>
+            <div class="difficulty-toggle">
+              <input type="radio" name="difficulty" id="diffEasy" value="easy">
+              <label for="diffEasy" class="difficulty-option" data-level="easy">
+                <span class="diff-dot"></span>
+                Easy
+              </label>
+              <input type="radio" name="difficulty" id="diffMedium" value="medium" checked>
+              <label for="diffMedium" class="difficulty-option" data-level="medium">
+                <span class="diff-dot"></span>
+                Medium
+              </label>
+              <input type="radio" name="difficulty" id="diffHard" value="hard">
+              <label for="diffHard" class="difficulty-option" data-level="hard">
+                <span class="diff-dot"></span>
+                Hard
+              </label>
             </div>
-            <span class="field-hint">The professional role this task is designed for</span>
           </div>
         </div>
+      </section>
 
-        <!-- Task Instruction -->
-        <div class="form-group full-width">
-          <label class="form-label" for="instruction">
-            <span class="label-icon">📝</span>
-            Task Instruction
-          </label>
-          <div class="textarea-wrapper">
-            <textarea
-              id="instruction"
-              class="form-textarea"
-              rows="8"
-              placeholder="Describe what the AI should accomplish in detail...
+      <!-- Section 2: Description -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">2</span>
+          <span class="badge-label">Description</span>
+        </div>
+
+        <div class="section-content">
+          <div class="input-group">
+            <label class="input-label" for="instruction">Task Instruction</label>
+            <div class="textarea-wrapper">
+              <textarea
+                id="instruction"
+                class="textarea-input"
+                rows="10"
+                placeholder="Describe what the AI should accomplish...
 
 Example: You are a financial analyst tasked with analyzing Q3 earnings data. Using the provided spreadsheet, calculate year-over-year growth rates, identify trends, and create a summary report highlighting key insights for stakeholders."
-              required
-            ></textarea>
-            <div class="char-count">
-              <span id="charCount">0</span> / 5000
+                required
+              ></textarea>
+              <div class="textarea-footer">
+                <span class="char-count"><span id="charCount">0</span> characters</span>
+                <span class="char-min">50 min</span>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Step 2: Reference Files -->
-      <section class="form-section" data-step="2">
-        <div class="section-header">
-          <div class="step-indicator">
-            <span class="step-number">2</span>
-            <span class="step-line"></span>
-          </div>
-          <div class="step-info">
-            <h2 class="section-title">Reference Files (Data)</h2>
-            <p class="section-subtitle">Upload materials the AI will need to complete the task</p>
-          </div>
+      <!-- Section 3: Files -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">3</span>
+          <span class="badge-label">Files</span>
         </div>
 
-        <div class="upload-zone" id="referenceZone">
-          <div class="upload-icon">📎</div>
-          <div class="upload-text">Drop reference files here</div>
-          <p class="upload-hint">
-            Supports: .pdf, .docx, .txt, .md, .csv, .json, .xlsx, .pptx, .png, .jpg, .mp4, .mov, .mp3, .wav
-          </p>
-          <input type="file" id="referenceInput" multiple accept=".pdf,.docx,.txt,.md,.csv,.json,.xlsx,.pptx,.png,.jpg,.jpeg,.gif,.mp4,.mov,.avi,.mp3,.wav,.ogg">
-          <button type="button" class="upload-btn">
-            <span>Browse Files</span>
-          </button>
-        </div>
+        <div class="section-content">
+          <div class="upload-grid">
+            <!-- Reference Files -->
+            <div class="upload-card">
+              <div class="upload-header">
+                <span class="upload-icon">📁</span>
+                <div>
+                  <h3 class="upload-title">Reference Data</h3>
+                  <p class="upload-desc">Files the AI will use</p>
+                </div>
+              </div>
+              <div class="upload-zone" id="referenceZone">
+                <input type="file" id="referenceInput" multiple accept=".pdf,.docx,.txt,.md,.csv,.json,.xlsx,.pptx,.png,.jpg,.jpeg,.gif,.mp4,.mov,.avi,.mp3,.wav,.ogg">
+                <div class="upload-placeholder">
+                  <svg class="upload-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 16V4m0 0L8 8m4-4l4 4"/>
+                    <path d="M3 20h18"/>
+                  </svg>
+                  <span>Drop files or click to browse</span>
+                </div>
+              </div>
+              <div class="file-list" id="referenceList"></div>
+              <p class="upload-formats">PDF, DOCX, CSV, JSON, PNG, JPG, MP4, MP3, WAV</p>
+            </div>
 
-        <div class="file-list" id="referenceList"></div>
-      </section>
-
-      <!-- Step 3: Solution Artifacts -->
-      <section class="form-section" data-step="3">
-        <div class="section-header">
-          <div class="step-indicator">
-            <span class="step-number">3</span>
-            <span class="step-line"></span>
-          </div>
-          <div class="step-info">
-            <h2 class="section-title">Solution Artifacts</h2>
-            <p class="section-subtitle">Upload the correct solution files (protected from AI access)</p>
-          </div>
-        </div>
-
-        <div class="upload-zone solution-zone" id="solutionZone">
-          <div class="upload-icon">🔐</div>
-          <div class="upload-text">Drop solution files here</div>
-          <p class="upload-hint">
-            Code, documents, presentations, videos — any format that represents the solution
-          </p>
-          <input type="file" id="solutionInput" multiple>
-          <button type="button" class="upload-btn">
-            <span>Browse Files</span>
-          </button>
-        </div>
-
-        <div class="file-list" id="solutionList"></div>
-
-        <div class="security-notice">
-          <span class="notice-icon">🛡️</span>
-          <span>These files will be stored in a protected folder inaccessible to the AI agent</span>
-        </div>
-      </section>
-
-      <!-- Step 4: Testing Rubric -->
-      <section class="form-section" data-step="4">
-        <div class="section-header">
-          <div class="step-indicator">
-            <span class="step-number">4</span>
-          </div>
-          <div class="step-info">
-            <h2 class="section-title">Testing Rubric</h2>
-            <p class="section-subtitle">Define how the AI's work will be evaluated (minimum 3 categories)</p>
-          </div>
-        </div>
-
-        <div class="rubric-container" id="rubricContainer">
-          <!-- Rubric items will be added here -->
-        </div>
-
-        <button type="button" class="add-rubric-btn" id="addRubricBtn">
-          <span class="btn-icon">+</span>
-          <span>Add Rubric Category</span>
-        </button>
-      </section>
-
-      <!-- Time Estimates -->
-      <section class="form-section compact">
-        <div class="section-header inline">
-          <h2 class="section-title">Time Estimates</h2>
-        </div>
-
-        <div class="time-explanation">
-          <p>Help us understand task complexity by estimating completion times:</p>
-          <ul>
-            <li><strong>Expert Time:</strong> How long would a seasoned professional with 10+ years experience take?</li>
-            <li><strong>Junior Time:</strong> How long would someone new to the field (1-2 years experience) take?</li>
-          </ul>
-          <p style="margin-top: 0.75rem; color: var(--yellow);"><strong>Note:</strong> Tasks must take at least 7 hours for an expert to complete.</p>
-        </div>
-
-        <div class="time-grid">
-          <div class="form-group">
-            <label class="form-label" for="expertTime">
-              <span class="label-icon">🎯</span>
-              Expert Time (hours)
-            </label>
-            <input type="number" id="expertTime" class="form-input" min="7" max="40" step="0.5" value="7" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="juniorTime">
-              <span class="label-icon">📚</span>
-              Junior Time (hours)
-            </label>
-            <input type="number" id="juniorTime" class="form-input" min="7" max="40" step="0.5" value="10" required>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label" for="difficulty">
-              <span class="label-icon">📊</span>
-              Difficulty
-            </label>
-            <div class="select-wrapper">
-              <select id="difficulty" class="form-select" required>
-                <option value="easy">Easy</option>
-                <option value="medium" selected>Medium</option>
-                <option value="hard">Hard</option>
-              </select>
-              <span class="select-arrow">▼</span>
+            <!-- Solution Files -->
+            <div class="upload-card solution">
+              <div class="upload-header">
+                <span class="upload-icon">🔐</span>
+                <div>
+                  <h3 class="upload-title">Solution Files</h3>
+                  <p class="upload-desc">Protected from AI access</p>
+                </div>
+                <span class="required-badge">Required</span>
+              </div>
+              <div class="upload-zone solution-zone" id="solutionZone">
+                <input type="file" id="solutionInput" multiple>
+                <div class="upload-placeholder">
+                  <svg class="upload-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M12 16V4m0 0L8 8m4-4l4 4"/>
+                    <path d="M3 20h18"/>
+                  </svg>
+                  <span>Drop files or click to browse</span>
+                </div>
+              </div>
+              <div class="file-list" id="solutionList"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- Submit Button -->
+      <!-- Section 4: Time -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">4</span>
+          <span class="badge-label">Time</span>
+        </div>
+
+        <div class="section-content">
+          <div class="time-notice">
+            <svg class="notice-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M12 6v6l4 2"/>
+            </svg>
+            <div>
+              <strong>Minimum 7 hours for experts</strong>
+              <p>Tasks must be complex enough to require significant time investment.</p>
+            </div>
+          </div>
+
+          <div class="time-inputs">
+            <div class="time-input-group">
+              <label class="input-label" for="expertTime">
+                <span class="time-icon">🎯</span>
+                Expert Time
+              </label>
+              <div class="time-input-wrapper">
+                <input type="number" id="expertTime" class="time-input" min="7" max="40" step="0.5" value="7" required>
+                <span class="time-suffix">hours</span>
+              </div>
+              <span class="input-hint">10+ years experience</span>
+            </div>
+
+            <div class="time-input-group">
+              <label class="input-label" for="juniorTime">
+                <span class="time-icon">📚</span>
+                Junior Time
+              </label>
+              <div class="time-input-wrapper">
+                <input type="number" id="juniorTime" class="time-input" min="7" max="40" step="0.5" value="10" required>
+                <span class="time-suffix">hours</span>
+              </div>
+              <span class="input-hint">1-2 years experience</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Rubric -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">5</span>
+          <span class="badge-label">Rubric</span>
+        </div>
+
+        <div class="section-content">
+          <p class="rubric-intro">Define evaluation criteria. Minimum 3 categories required.</p>
+
+          <div class="rubric-container" id="rubricContainer">
+            <!-- Rubric items will be added here -->
+          </div>
+
+          <button type="button" class="add-rubric-btn" id="addRubricBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Add Category
+          </button>
+
+          <div class="rubric-total">
+            Total: <span id="rubricTotal">0</span> points
+          </div>
+        </div>
+      </section>
+
+      <!-- Submit Actions -->
       <div class="form-actions">
-        <button type="button" class="preview-btn" id="previewBtn">
-          <span class="btn-icon">👁️</span>
+        <button type="button" class="btn btn-secondary" id="previewBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
           Preview Task
         </button>
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <span class="btn-icon">⚡</span>
-          Submit Task
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+          </svg>
+          Generate Task
         </button>
       </div>
     </form>
+  </main>
 
-    <!-- Preview Modal -->
-    <div class="modal" id="previewModal">
-      <div class="modal-backdrop"></div>
-      <div class="modal-content">
-        <div class="modal-header">
-          <h2>Task Preview</h2>
-          <button class="modal-close" id="closePreview">&times;</button>
+  <!-- Preview Modal -->
+  <div class="modal" id="previewModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>📦 Task Preview</h2>
+        <button class="modal-close" id="closePreview">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 6L6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="preview-tabs">
+          <button class="tab-btn active" data-tab="yaml">task.yaml</button>
+          <button class="tab-btn" data-tab="solution">solution.sh</button>
+          <button class="tab-btn" data-tab="structure">Structure</button>
         </div>
-        <div class="modal-body">
-          <div class="preview-tabs">
-            <button class="tab-btn active" data-tab="yaml">task.yaml</button>
-            <button class="tab-btn" data-tab="solution">solution.sh</button>
-            <button class="tab-btn" data-tab="structure">File Structure</button>
-          </div>
-          <div class="preview-content">
-            <pre class="code-preview" id="yamlPreview"></pre>
-            <pre class="code-preview hidden" id="solutionPreview"></pre>
-            <div class="structure-preview hidden" id="structurePreview"></div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button class="download-btn" id="downloadBtn">
-            <span class="btn-icon">📦</span>
-            Download ZIP
-          </button>
+        <div class="preview-content">
+          <pre class="code-preview" id="yamlPreview"></pre>
+          <pre class="code-preview hidden" id="solutionPreview"></pre>
+          <div class="structure-preview hidden" id="structurePreview"></div>
         </div>
       </div>
-    </div>
-
-    <!-- Success Modal -->
-    <div class="modal" id="successModal">
-      <div class="modal-backdrop"></div>
-      <div class="modal-content success-modal">
-        <div class="success-icon">✅</div>
-        <h2>Task Created Successfully!</h2>
-        <p class="task-id-display">Task ID: <code id="successTaskId"></code></p>
-        <p id="dbStatus" class="db-status"></p>
-        <p class="success-message">Your task package has been downloaded and saved for processing.</p>
-        <button class="submit-btn" id="closeSuccessModal">
-          <span class="btn-icon">✓</span>
-          Done
+      <div class="modal-footer">
+        <button class="btn btn-success" id="downloadBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/>
+          </svg>
+          Download ZIP
         </button>
       </div>
     </div>
-
-    <!-- Toast Notifications -->
-    <div class="toast-container" id="toastContainer"></div>
   </div>
+
+  <!-- Success Modal -->
+  <div class="modal" id="successModal">
+    <div class="modal-backdrop"></div>
+    <div class="modal-content success-modal">
+      <div class="success-checkmark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 6L9 17l-5-5"/>
+        </svg>
+      </div>
+      <h2>Task Created!</h2>
+      <div class="success-task-id">
+        <span class="task-id-label">Task ID</span>
+        <code id="successTaskId"></code>
+      </div>
+      <p id="dbStatus" class="db-status"></p>
+      <button class="btn btn-primary" id="closeSuccessModal">Done</button>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
