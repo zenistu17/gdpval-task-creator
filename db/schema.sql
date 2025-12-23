@@ -37,8 +37,13 @@ CREATE TABLE IF NOT EXISTS gdpval_solution_files (
     file_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     extension VARCHAR(50),
-    mime_type VARCHAR(100),
-    storage_path TEXT,  -- Path to file in object storage (S3, etc.)
+    -- Media metadata (nullable, depending on file type)
+    width INTEGER,              -- For images and videos
+    height INTEGER,             -- For images and videos
+    resolution VARCHAR(50),     -- e.g., "1920x1080"
+    duration_seconds DECIMAL(10,2),  -- For audio and video
+    duration_formatted VARCHAR(20),   -- e.g., "1:23:45"
+    storage_path TEXT,          -- Path to file in object storage (S3, etc.)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -49,8 +54,13 @@ CREATE TABLE IF NOT EXISTS gdpval_data_files (
     file_name VARCHAR(255) NOT NULL,
     file_size BIGINT NOT NULL,
     extension VARCHAR(50),
-    mime_type VARCHAR(100),
-    storage_path TEXT,  -- Path to file in object storage (S3, etc.)
+    -- Media metadata (nullable, depending on file type)
+    width INTEGER,              -- For images and videos
+    height INTEGER,             -- For images and videos
+    resolution VARCHAR(50),     -- e.g., "1920x1080"
+    duration_seconds DECIMAL(10,2),  -- For audio and video
+    duration_formatted VARCHAR(20),   -- e.g., "1:23:45"
+    storage_path TEXT,          -- Path to file in object storage (S3, etc.)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

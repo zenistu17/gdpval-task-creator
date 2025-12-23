@@ -48,7 +48,12 @@ class FileMetadata(BaseModel):
     name: str
     size: int
     extension: str
-    type: str
+    # Optional media metadata
+    width: Optional[int] = None
+    height: Optional[int] = None
+    resolution: Optional[str] = None
+    duration_seconds: Optional[float] = None
+    duration_formatted: Optional[str] = None
 
 
 class TaskCreate(BaseModel):
@@ -142,14 +147,19 @@ async def create_task(task: TaskCreate):
                 await conn.execute(
                     """
                     INSERT INTO gdpval_solution_files
-                        (task_id, file_name, file_size, extension, mime_type)
-                    VALUES ($1, $2, $3, $4, $5)
+                        (task_id, file_name, file_size, extension,
+                         width, height, resolution, duration_seconds, duration_formatted)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                     """,
                     task.task_id,
                     file_meta.name,
                     file_meta.size,
                     file_meta.extension,
-                    file_meta.type
+                    file_meta.width,
+                    file_meta.height,
+                    file_meta.resolution,
+                    file_meta.duration_seconds,
+                    file_meta.duration_formatted
                 )
 
             # Insert data file metadata
@@ -157,14 +167,19 @@ async def create_task(task: TaskCreate):
                 await conn.execute(
                     """
                     INSERT INTO gdpval_data_files
-                        (task_id, file_name, file_size, extension, mime_type)
-                    VALUES ($1, $2, $3, $4, $5)
+                        (task_id, file_name, file_size, extension,
+                         width, height, resolution, duration_seconds, duration_formatted)
+                    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                     """,
                     task.task_id,
                     file_meta.name,
                     file_meta.size,
                     file_meta.extension,
-                    file_meta.type
+                    file_meta.width,
+                    file_meta.height,
+                    file_meta.resolution,
+                    file_meta.duration_seconds,
+                    file_meta.duration_formatted
                 )
 
             # Insert task.yaml content

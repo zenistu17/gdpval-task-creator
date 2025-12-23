@@ -135,13 +135,30 @@ const FILE_ICONS = {
   'mov': '🎬',
   'mp4': '🎬',
   'avi': '🎬',
+  'webm': '🎬',
+  'mkv': '🎬',
   'png': '🖼️',
   'jpg': '🖼️',
   'jpeg': '🖼️',
   'gif': '🖼️',
   'svg': '🖼️',
+  'webp': '🖼️',
+  'bmp': '🖼️',
+  'mp3': '🎵',
+  'wav': '🎵',
+  'ogg': '🎵',
+  'flac': '🎵',
+  'aac': '🎵',
+  'm4a': '🎵',
   'zip': '📦',
   'default': '📁'
+};
+
+// File type categories for metadata extraction
+const FILE_CATEGORIES = {
+  image: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'],
+  video: ['mp4', 'mov', 'avi', 'webm', 'mkv'],
+  audio: ['mp3', 'wav', 'ogg', 'flac', 'aac', 'm4a']
 };
 
 // ============================================
@@ -699,16 +716,127 @@ function generateTaskId() {
 // ZIP Generation & Download
 // ============================================
 
-function generateFileMetadata(files) {
-  return files.map(file => {
+function getFileCategory(extension) {
+  for (const [category, extensions] of Object.entries(FILE_CATEGORIES)) {
+    if (extensions.includes(extension)) {
+      return category;
+    }
+  }
+  return 'other';
+}
+
+function getImageMetadata(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        resolution: `${img.naturalWidth}x${img.naturalHeight}`
+      });
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+
+    img.src = url;
+  });
+}
+
+function getAudioMetadata(file) {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    const url = URL.createObjectURL(file);
+
+    audio.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        duration_seconds: Math.round(audio.duration * 100) / 100,
+        duration_formatted: formatDuration(audio.duration)
+      });
+    };
+
+    audio.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+
+    audio.src = url;
+  });
+}
+
+function getVideoMetadata(file) {
+  return new Promise((resolve) => {
+    const video = document.createElement('video');
+    const url = URL.createObjectURL(file);
+
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        resolution: `${video.videoWidth}x${video.videoHeight}`,
+        duration_seconds: Math.round(video.duration * 100) / 100,
+        duration_formatted: formatDuration(video.duration)
+      });
+    };
+
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+
+    video.src = url;
+  });
+}
+
+function formatDuration(seconds) {
+  if (!seconds || isNaN(seconds)) return '0:00';
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+}
+
+async function generateFileMetadata(files) {
+  const metadataPromises = files.map(async (file) => {
     const extension = file.name.split('.').pop().toLowerCase();
-    return {
+    const category = getFileCategory(extension);
+
+    const baseMetadata = {
       name: file.name,
       size: file.size,
-      extension: extension,
-      type: file.type || 'application/octet-stream'
+      extension: extension
     };
+
+    // Get additional metadata based on file type
+    let additionalMetadata = null;
+
+    if (category === 'image') {
+      additionalMetadata = await getImageMetadata(file);
+    } else if (category === 'audio') {
+      additionalMetadata = await getAudioMetadata(file);
+    } else if (category === 'video') {
+      additionalMetadata = await getVideoMetadata(file);
+    }
+
+    if (additionalMetadata) {
+      return { ...baseMetadata, ...additionalMetadata };
+    }
+
+    return baseMetadata;
   });
+
+  return Promise.all(metadataPromises);
 }
 
 async function saveToDatabase(taskId) {
@@ -726,6 +854,11 @@ async function saveToDatabase(taskId) {
   const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
   const rubrics = getRubricData();
 
+  const [solutionMetadata, dataMetadata] = await Promise.all([
+    generateFileMetadata(state.solutionFiles),
+    generateFileMetadata(state.referenceFiles)
+  ]);
+
   const payload = {
     task_id: taskId,
     task_name: taskName,
@@ -740,8 +873,8 @@ async function saveToDatabase(taskId) {
       description: r.description || null,
       points: r.points
     })),
-    solution_files: generateFileMetadata(state.solutionFiles),
-    data_files: generateFileMetadata(state.referenceFiles),
+    solution_files: solutionMetadata,
+    data_files: dataMetadata,
     task_yaml: generateTaskYaml(),
     solution_sh: generateSolutionSh()
   };
@@ -788,7 +921,7 @@ async function generateAndDownload() {
     // Add data folder with reference files and metadata
     if (state.referenceFiles.length > 0) {
       const data = folder.folder('data');
-      const dataMetadata = generateFileMetadata(state.referenceFiles);
+      const dataMetadata = await generateFileMetadata(state.referenceFiles);
       data.file('metadata.json', JSON.stringify(dataMetadata, null, 2));
       for (const file of state.referenceFiles) {
         const content = await readFileAsArrayBuffer(file);
@@ -798,7 +931,7 @@ async function generateAndDownload() {
 
     // Add solution folder with solution files and metadata
     const solution = folder.folder('solution');
-    const solutionMetadata = generateFileMetadata(state.solutionFiles);
+    const solutionMetadata = await generateFileMetadata(state.solutionFiles);
     solution.file('metadata.json', JSON.stringify(solutionMetadata, null, 2));
     for (const file of state.solutionFiles) {
       const content = await readFileAsArrayBuffer(file);
