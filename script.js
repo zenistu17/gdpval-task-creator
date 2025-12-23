@@ -1076,16 +1076,6 @@ function initializeDifficultyToggle() {
 // ============================================
 
 function initializeKeyboardShortcuts() {
-  // Header preview button
-  const headerPreviewBtn = document.getElementById('headerPreviewBtn');
-  if (headerPreviewBtn) {
-    headerPreviewBtn.addEventListener('click', () => {
-      if (validateForm()) {
-        showPreview();
-      }
-    });
-  }
-
   // Keyboard shortcut: Cmd/Ctrl + P for preview
   document.addEventListener('keydown', (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === 'p') {

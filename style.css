@@ -80,6 +80,7 @@
   --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
 
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Outfit', 'Space Grotesk', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
@@ -148,123 +149,6 @@ body {
   75% { transform: translate(40px, 40px) scale(1.02); }
 }
 
-/* ============================================
-   Sticky Header
-   ============================================ */
-
-.sticky-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: rgba(13, 13, 26, 0.85);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
-}
-
-.header-inner {
-  max-width: 1600px;
-  margin: 0 auto;
-  padding: 0 40px;
-  height: 64px;
-  display: flex;
-  align-items: center;
-  gap: 32px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 700;
-  font-size: 1.25rem;
-}
-
-.logo-icon {
-  font-size: 1.5rem;
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
-}
-
-.logo-text {
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  font-weight: 800;
-  text-shadow: 0 0 30px rgba(168, 85, 247, 0.5);
-}
-
-.progress-wrapper {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  max-width: 400px;
-}
-
-.progress-bar {
-  flex: 1;
-  height: 6px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  width: 0%;
-  background: var(--gradient-primary);
-  border-radius: 3px;
-  transition: width 0.5s var(--ease-out);
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
-}
-
-.progress-text {
-  font-size: 0.875rem;
-  font-weight: 700;
-  color: var(--cyan);
-  min-width: 40px;
-  text-shadow: 0 0 10px var(--cyan);
-}
-
-.header-preview-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background: var(--glass-bg);
-  border: 1px solid var(--purple);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s var(--ease-out);
-  box-shadow: 0 0 15px rgba(168, 85, 247, 0.3);
-}
-
-.header-preview-btn:hover {
-  background: rgba(168, 85, 247, 0.2);
-  border-color: var(--purple-light);
-  box-shadow: var(--neon-glow-purple);
-  transform: translateY(-2px);
-}
-
-.kbd {
-  padding: 2px 6px;
-  background: rgba(168, 85, 247, 0.3);
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-family: var(--font-mono);
-  color: var(--purple-light);
-}
 
 /* ============================================
    Main Content
@@ -273,37 +157,81 @@ body {
 .main-content {
   position: relative;
   z-index: 1;
-  max-width: 1600px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 100px 40px 60px;
+  padding: 60px 40px 60px;
 }
 
 /* ============================================
-   Hero Section
+   Hero Section - Cinematic Style
    ============================================ */
 
 .hero {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 40px;
   animation: fadeSlideDown 0.8s var(--ease-out);
 }
 
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 100px;
+  margin-bottom: 24px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--purple-light);
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.2);
+  animation: glow 3s ease-in-out infinite;
+}
+
+.badge-icon {
+  font-size: 1rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
+  50% { box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
+}
+
 .hero-title {
-  font-size: 3.5rem;
+  font-family: var(--font-display);
+  font-size: 5rem;
   font-weight: 800;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 20px;
+}
+
+.title-line {
+  display: block;
+  color: var(--text-primary);
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+.title-line.gradient {
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  margin-bottom: 12px;
-  text-shadow: 0 0 60px rgba(168, 85, 247, 0.5);
+  filter: drop-shadow(0 0 30px rgba(168, 85, 247, 0.5));
 }
 
 .hero-subtitle {
-  font-size: 1.25rem;
-  color: var(--text-secondary);
+  font-size: 1.15rem;
+  color: var(--text-muted);
   font-weight: 400;
+  letter-spacing: 0.02em;
 }
 
 @keyframes fadeSlideDown {
@@ -315,6 +243,74 @@ body {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ============================================
+   Form Progress Bar
+   ============================================ */
+
+.form-progress {
+  background: var(--gradient-card);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  animation: fadeSlideUp 0.6s var(--ease-out);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.progress-percent {
+  font-size: 1.1rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  color: var(--cyan);
+  text-shadow: 0 0 15px var(--cyan);
+}
+
+.progress-track {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gradient-primary);
+  border-radius: 5px;
+  transition: width 0.5s var(--ease-out);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.6);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* ============================================
@@ -1139,9 +1135,15 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 
 .form-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 16px;
-  padding-top: 16px;
+  justify-content: center;
+  gap: 20px;
+  padding-top: 24px;
+  padding-bottom: 16px;
+}
+
+.btn-wide {
+  min-width: 200px;
+  padding: 16px 32px;
 }
 
 /* ============================================

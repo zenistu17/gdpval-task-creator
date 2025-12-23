@@ -6,7 +6,7 @@
   <title>GDPVal Task Creator</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -17,31 +17,29 @@
     <div class="orb orb3"></div>
   </div>
 
-  <!-- Sticky Header with Progress -->
-  <header class="sticky-header">
-    <div class="header-inner">
-      <div class="logo">
-        <span class="logo-icon">⚡</span>
-        <span class="logo-text">GDPVal</span>
-      </div>
-      <div class="progress-wrapper">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
-        </div>
-        <span class="progress-text" id="progressText">0%</span>
-      </div>
-      <button type="button" class="header-preview-btn" id="headerPreviewBtn">
-        <span>Preview</span>
-        <span class="kbd">⌘P</span>
-      </button>
-    </div>
-  </header>
-
   <main class="main-content">
     <!-- Hero Section -->
     <div class="hero">
-      <h1 class="hero-title">Task Creator</h1>
-      <p class="hero-subtitle">Build world-class AI evaluation tasks</p>
+      <div class="hero-badge">
+        <span class="badge-icon">⚡</span>
+        <span>GDPVal Benchmark Suite</span>
+      </div>
+      <h1 class="hero-title">
+        <span class="title-line">Task</span>
+        <span class="title-line gradient">Creator</span>
+      </h1>
+      <p class="hero-subtitle">Design professional AI evaluation tasks with precision</p>
+    </div>
+
+    <!-- Form Progress Bar -->
+    <div class="form-progress">
+      <div class="progress-header">
+        <span class="progress-label">Form Progress</span>
+        <span class="progress-percent" id="progressText">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
     </div>
 
     <!-- Main Form -->
@@ -279,14 +277,14 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
 
       <!-- Submit Actions -->
       <div class="form-actions">
-        <button type="button" class="btn btn-secondary" id="previewBtn">
+        <button type="button" class="btn btn-secondary btn-wide" id="previewBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
             <circle cx="12" cy="12" r="3"/>
           </svg>
           Preview Task
         </button>
-        <button type="submit" class="btn btn-primary" id="submitBtn">
+        <button type="submit" class="btn btn-primary btn-wide" id="submitBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
           </svg>
