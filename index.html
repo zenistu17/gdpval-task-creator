@@ -49,6 +49,22 @@
           </div>
         </div>
 
+        <!-- Task Name -->
+        <div class="form-group full-width" style="margin-bottom: 1.5rem;">
+          <label class="form-label" for="taskName">
+            <span class="label-icon">🏷️</span>
+            Task Name
+          </label>
+          <input
+            type="text"
+            id="taskName"
+            class="form-input"
+            placeholder="e.g., quarterly-earnings-analysis, contract-review, patient-triage"
+            required
+          >
+          <span class="field-hint">A short, descriptive name for this task (lowercase, hyphens allowed)</span>
+        </div>
+
         <div class="form-grid">
           <!-- Sector Dropdown -->
           <div class="form-group">
@@ -112,7 +128,7 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
             <span class="step-line"></span>
           </div>
           <div class="step-info">
-            <h2 class="section-title">Reference Files</h2>
+            <h2 class="section-title">Reference Files (Data)</h2>
             <p class="section-subtitle">Upload materials the AI will need to complete the task</p>
           </div>
         </div>
@@ -193,21 +209,29 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
           <h2 class="section-title">Time Estimates</h2>
         </div>
 
+        <div class="time-explanation">
+          <p>Help us understand task complexity by estimating completion times:</p>
+          <ul>
+            <li><strong>Expert Time:</strong> How long would a seasoned professional with 10+ years experience take?</li>
+            <li><strong>Junior Time:</strong> How long would someone new to the field (1-2 years experience) take?</li>
+          </ul>
+        </div>
+
         <div class="time-grid">
           <div class="form-group">
             <label class="form-label" for="expertTime">
               <span class="label-icon">🎯</span>
-              Expert Time (minutes)
+              Expert Time (hours)
             </label>
-            <input type="number" id="expertTime" class="form-input" min="1" max="480" value="15" required>
+            <input type="number" id="expertTime" class="form-input" min="0.25" max="40" step="0.25" value="0.5" required>
           </div>
 
           <div class="form-group">
             <label class="form-label" for="juniorTime">
               <span class="label-icon">📚</span>
-              Junior Time (minutes)
+              Junior Time (hours)
             </label>
-            <input type="number" id="juniorTime" class="form-input" min="1" max="480" value="45" required>
+            <input type="number" id="juniorTime" class="form-input" min="0.25" max="40" step="0.25" value="1.5" required>
           </div>
 
           <div class="form-group">
@@ -233,9 +257,9 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
           <span class="btn-icon">👁️</span>
           Preview Task
         </button>
-        <button type="submit" class="submit-btn" id="generateBtn">
+        <button type="submit" class="submit-btn" id="submitBtn">
           <span class="btn-icon">⚡</span>
-          Generate Task Package
+          Submit Task
         </button>
       </div>
     </form>
@@ -266,6 +290,22 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
             Download ZIP
           </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+      <div class="modal-backdrop"></div>
+      <div class="modal-content success-modal">
+        <div class="success-icon">✅</div>
+        <h2>Task Created Successfully!</h2>
+        <p class="task-id-display">Task ID: <code id="successTaskId"></code></p>
+        <p id="dbStatus" class="db-status"></p>
+        <p class="success-message">Your task package has been downloaded and saved for processing.</p>
+        <button class="submit-btn" id="closeSuccessModal">
+          <span class="btn-icon">✓</span>
+          Done
+        </button>
       </div>
     </div>
 

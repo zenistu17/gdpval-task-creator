@@ -145,6 +145,15 @@ const FILE_ICONS = {
 };
 
 // ============================================
+// API Configuration
+// ============================================
+
+const API_CONFIG = {
+  baseUrl: window.GDPVAL_API_URL || 'http://localhost:8000',
+  enabled: true  // Set to false to disable API calls
+};
+
+// ============================================
 // State Management
 // ============================================
 
@@ -179,7 +188,7 @@ function initializeSectorDropdown() {
   GDPVAL_DATA.sectors.forEach(sector => {
     const option = document.createElement('option');
     option.value = sector.name;
-    option.textContent = `${sector.name} (${sector.gdpShare} of GDP)`;
+    option.textContent = sector.name;
     sectorSelect.appendChild(option);
   });
 
@@ -456,10 +465,21 @@ function initializeFormSubmission() {
 }
 
 function validateForm() {
+  const taskName = document.getElementById('taskName').value.trim();
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
   const rubrics = getRubricData();
+
+  if (!taskName) {
+    showToast('Please enter a task name', 'error');
+    return false;
+  }
+
+  if (!/^[a-z0-9-]+$/.test(taskName)) {
+    showToast('Task name must be lowercase with hyphens only', 'error');
+    return false;
+  }
 
   if (!sector) {
     showToast('Please select a sector', 'error');
@@ -494,12 +514,16 @@ function validateForm() {
 // ============================================
 
 function generateTaskYaml() {
+  const taskName = document.getElementById('taskName').value.trim();
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
   const difficulty = document.getElementById('difficulty').value;
-  const expertTime = document.getElementById('expertTime').value;
-  const juniorTime = document.getElementById('juniorTime').value;
+  // Time inputs are now in hours - convert to minutes for YAML
+  const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
+  const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
+  const expertTimeMin = Math.round(expertTimeHours * 60);
+  const juniorTimeMin = Math.round(juniorTimeHours * 60);
   const rubrics = getRubricData();
 
   const totalPoints = rubrics.reduce((sum, r) => sum + r.points, 0);
@@ -516,7 +540,8 @@ Rubric: ${totalPoints} points
 ${rubricStr}`;
 
   // Generate YAML
-  const yaml = `instruction: |-
+  const yaml = `task_name: ${taskName}
+instruction: |-
 ${fullInstruction.split('\n').map(line => '  ' + line).join('\n')}
 difficulty: ${difficulty}
 category: gdpval
@@ -528,9 +553,9 @@ max_agent_timeout_sec: 900.0
 max_test_timeout_sec: 300.0
 run_tests_in_same_shell: false
 disable_asciinema: false
-estimated_duration_sec: ${parseInt(expertTime) * 60}
-expert_time_estimate_min: ${expertTime}
-junior_time_estimate_min: ${juniorTime}
+estimated_duration_sec: ${expertTimeMin * 60}
+expert_time_estimate_min: ${expertTimeMin}
+junior_time_estimate_min: ${juniorTimeMin}
 sector: ${sector}
 occupation: ${occupation}
 `;
@@ -568,384 +593,9 @@ echo "Solution execution complete."
   return script;
 }
 
-function generateDockerfile() {
-  return `FROM ghcr.io/laude-institute/t-bench/python-3-13:20250620
 
-ENV PYTHONUNBUFFERED=1 \\
-    PYTHONDONTWRITEBYTECODE=1 \\
-    PIP_NO_CACHE_DIR=1 \\
-    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-RUN apt-get update && apt-get install -y --no-install-recommends \\
-    tmux \\
-    asciinema \\
-    && rm -rf /var/lib/apt/lists/*
 
-# DO NOT REMOVE THESE OR THE TESTS WILL FAIL
-RUN pip install pytest httpx pydantic pyyaml
-`;
-}
-
-function generateDockerCompose() {
-  return `services:
-  client:
-    build:
-      dockerfile: Dockerfile
-    image: \${T_BENCH_TASK_DOCKER_CLIENT_IMAGE_NAME}
-    container_name: \${T_BENCH_TASK_DOCKER_CLIENT_CONTAINER_NAME}
-    command: ["sh", "-c", "sleep infinity"]
-    working_dir: /app
-    environment:
-      - TEST_DIR=\${T_BENCH_TEST_DIR}
-      - LLM_JUDGE_API_KEY=\${LLM_JUDGE_API_KEY:?LLM_JUDGE_API_KEY environment variable is not set}
-      - LLM_JUDGE_MODEL=\${LLM_JUDGE_MODEL:?LLM_JUDGE_MODEL environment variable is not set}
-      # Python settings
-      - PYTHONUNBUFFERED=1
-      - PYTHONDONTWRITEBYTECODE=1
-    volumes:
-      - \${T_BENCH_TASK_LOGS_PATH}:\${T_BENCH_CONTAINER_LOGS_PATH}
-      - \${T_BENCH_TASK_AGENT_LOGS_PATH}:\${T_BENCH_CONTAINER_AGENT_LOGS_PATH}
-`;
-}
-
-function generateRunTests() {
-  return `#!/bin/bash
-
-pytest $TEST_DIR/test_outputs.py -v -rA
-`;
-}
-
-function generateTestFile() {
-  const rubrics = getRubricData();
-  const occupation = document.getElementById('occupation').value;
-  const instruction = document.getElementById('instruction').value.trim();
-  const totalPoints = rubrics.reduce((sum, r) => sum + r.points, 0);
-
-  // Generate rubric scoring section
-  const rubricScoring = rubrics.map((r, i) =>
-    `${i + 1}. ${r.name.toUpperCase()} (0-${r.points} points):
-   - ${r.points}: Excellent - ${r.description || 'Fully meets requirements'}
-   - ${Math.floor(r.points * 0.7)}-${r.points - 1}: Good - Minor issues
-   - ${Math.floor(r.points * 0.4)}-${Math.floor(r.points * 0.7) - 1}: Adequate - Notable gaps
-   - 1-${Math.floor(r.points * 0.4) - 1}: Poor - Significant issues
-   - 0: Not attempted or completely wrong`
-  ).join('\n\n');
-
-  const rubricFields = rubrics.map(r =>
-    `    ${r.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}: int = Field(ge=0, le=${r.points})`
-  ).join('\n');
-
-  const rubricPrintStatements = rubrics.map(r => {
-    const key = r.name.toLowerCase().replace(/[^a-z0-9]+/g, '_');
-    return `        print(f"${r.name}: {scores.get('${key}', 'N/A')}/${r.points}")`;
-  }).join('\n');
-
-  return `#!/usr/bin/env python3
-"""
-GDPVal Task - Tests and LLM-as-a-Judge Evaluation.
-
-Occupation: ${occupation}
-Deterministic tests verify basic requirements, LLM judge evaluates quality.
-
-Environment Variables:
-    LLM_JUDGE_API_KEY: API key for OpenRouter
-    LLM_JUDGE_MODEL: Optional model override (default: anthropic/claude-sonnet-4)
-"""
-
-import json
-import os
-import subprocess
-import time
-from pathlib import Path
-from typing import Optional
-
-import httpx
-import pytest
-import yaml
-from pydantic import BaseModel, Field
-
-
-class LLMJudgeResponse(BaseModel):
-    """Pydantic model for LLM judge response."""
-${rubricFields}
-    total: int = Field(ge=0, le=${totalPoints})
-    feedback: str
-
-
-# Constants
-TASK_YAML = Path("/app/task.yaml")
-OUTPUT_DIR = Path("/app/output")
-
-RUBRIC = """
-Score the submission on the following rubric (total ${totalPoints} points):
-
-${rubricScoring}
-"""
-
-
-def read_file_safe(path: Path) -> Optional[str]:
-    """Read a file if it exists, return None otherwise."""
-    if path.exists():
-        return path.read_text(encoding="utf-8")
-    return None
-
-
-def get_task_description() -> str:
-    """Read task description from task.yaml."""
-    if TASK_YAML.exists():
-        with open(TASK_YAML) as f:
-            task = yaml.safe_load(f)
-        return task.get("instruction", "")
-    return ""
-
-
-# =============================================================================
-# LLM Judge Configuration and Calling
-# =============================================================================
-
-
-def get_llm_judge_config() -> Optional[dict]:
-    """Get LLM judge configuration from environment variables."""
-    api_key = os.environ.get("LLM_JUDGE_API_KEY")
-    model = os.environ.get("LLM_JUDGE_MODEL")
-
-    if not api_key:
-        return None
-
-    return {
-        "api_key": api_key,
-        "model": model or "anthropic/claude-sonnet-4",
-        "fallback_model": "openai/gpt-4.1",
-    }
-
-
-def extract_json_from_text(text: str) -> Optional[dict]:
-    """Extract JSON object from text, handling various formats."""
-    text = text.strip()
-
-    # Remove markdown code blocks if present
-    if "\`\`\`" in text:
-        parts = text.split("\`\`\`")
-        for part in parts[1::2]:
-            part = part.strip()
-            if part.startswith("json"):
-                part = part[4:].strip()
-            try:
-                return json.loads(part)
-            except json.JSONDecodeError:
-                continue
-
-    # Try to parse the entire text as JSON
-    try:
-        return json.loads(text)
-    except json.JSONDecodeError:
-        pass
-
-    # Try to find JSON object with braces
-    brace_depth = 0
-    start_idx = None
-    for i, char in enumerate(text):
-        if char == '{':
-            if brace_depth == 0:
-                start_idx = i
-            brace_depth += 1
-        elif char == '}':
-            brace_depth -= 1
-            if brace_depth == 0 and start_idx is not None:
-                candidate = text[start_idx:i+1]
-                try:
-                    return json.loads(candidate)
-                except json.JSONDecodeError:
-                    start_idx = None
-                    continue
-
-    return None
-
-
-def call_llm_judge(prompt: str, config: dict, max_retries: int = 5) -> dict:
-    """Call LLM judge via OpenRouter with fallback and retries."""
-    api_key = config["api_key"]
-    model = config["model"]
-    fallback_model = config["fallback_model"]
-
-    system_prompt = """You are an expert evaluator for ${occupation} tasks.
-You have deep expertise in this field and will evaluate submissions fairly and thoroughly.
-Evaluate the provided work and return a JSON response with scores.
-Be strict but fair - the work should be correct, complete, and professional.
-IMPORTANT: Your response MUST contain valid JSON with all required score fields and feedback."""
-
-    user_content = [{"type": "text", "text": prompt}]
-
-    url = "https://openrouter.ai/api/v1/chat/completions"
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-
-    last_error = None
-
-    for attempt in range(max_retries):
-        print(f"[LLM Judge] Attempt {attempt + 1}/{max_retries}")
-
-        text = None
-        for m in [model, fallback_model]:
-            try:
-                print(f"[LLM Judge] Trying model: {m}")
-                payload = {
-                    "model": m,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_content},
-                    ],
-                }
-                with httpx.Client(timeout=120.0) as client:
-                    response = client.post(url, headers=headers, json=payload)
-                    print(f"[LLM Judge] Response status: {response.status_code}")
-                    response.raise_for_status()
-                    data = response.json()
-                text = data["choices"][0]["message"]["content"]
-                print(f"[LLM Judge] Model {m} succeeded")
-                break
-            except Exception as e:
-                last_error = e
-                print(f"[LLM Judge] Model {m} failed: {e}")
-                if m == fallback_model:
-                    break
-                continue
-
-        if text is None:
-            print(f"[LLM Judge] All models failed on attempt {attempt + 1}, retrying...")
-            time.sleep(1)
-            continue
-
-        parsed = extract_json_from_text(text)
-
-        if parsed is None:
-            last_error = ValueError("Could not parse JSON from judge response")
-            print(f"[LLM Judge] JSON parsing failed on attempt {attempt + 1}, retrying...")
-            time.sleep(1)
-            continue
-
-        try:
-            validated = LLMJudgeResponse(**parsed)
-            return validated.model_dump()
-        except Exception as e:
-            last_error = e
-            print(f"[LLM Judge] Validation failed on attempt {attempt + 1}: {e}, retrying...")
-            time.sleep(1)
-            continue
-
-    raise ValueError(f"All {max_retries} attempts failed. Last error: {last_error}")
-
-
-def build_judge_prompt(submission_content: str, task_description: str) -> str:
-    """Build the complete prompt for the LLM judge."""
-    return f"""You are evaluating a submission for a ${occupation} task.
-
-## TASK:
-{task_description}
-
-## SCORING RUBRIC:
-{RUBRIC}
-
-## SUBMISSION:
-{submission_content}
-
-## YOUR EVALUATION:
-
-Based on the submission above, evaluate this work according to the rubric.
-Consider accuracy, completeness, and professional quality.
-
-Return your evaluation as JSON with the following fields:
-${rubrics.map(r => `- "${r.name.toLowerCase().replace(/[^a-z0-9]+/g, '_')}": score from 0-${r.points}`).join('\n')}
-- "total": sum of all scores (0-${totalPoints})
-- "feedback": 2-4 sentences explaining your scores
-"""
-
-
-# =============================================================================
-# Tests - Basic Requirements
-# =============================================================================
-
-
-class TestBasicRequirements:
-    """Tests that verify basic task requirements."""
-
-    def test_output_directory_exists(self):
-        """Output directory should exist with solution files."""
-        assert OUTPUT_DIR.exists(), f"Output directory not found: {OUTPUT_DIR}"
-
-    def test_output_has_files(self):
-        """Output directory should contain solution files."""
-        files = list(OUTPUT_DIR.glob("*"))
-        assert len(files) > 0, "Output directory is empty - no solution files found"
-
-
-# =============================================================================
-# Tests - LLM Judge
-# =============================================================================
-
-
-class TestLLMJudge:
-    """LLM-as-a-Judge evaluation of the submission."""
-
-    @pytest.fixture(autouse=True)
-    def setup(self):
-        """Setup test fixtures."""
-        self.config = get_llm_judge_config()
-
-    def test_llm_judge_evaluation(self):
-        """LLM evaluates the overall quality of the submission."""
-        if self.config is None:
-            pytest.skip("LLM judge not configured - set LLM_JUDGE_API_KEY")
-
-        if not OUTPUT_DIR.exists():
-            pytest.fail("Cannot evaluate - output directory does not exist")
-
-        # Collect submission content
-        submission_parts = []
-        for file_path in OUTPUT_DIR.glob("*"):
-            if file_path.is_file():
-                try:
-                    content = file_path.read_text(encoding="utf-8")
-                    submission_parts.append(f"### File: {file_path.name}\\n\\n{content}")
-                except Exception:
-                    submission_parts.append(f"### File: {file_path.name} (binary file)")
-
-        if not submission_parts:
-            pytest.fail("No files found in output directory")
-
-        submission_content = "\\n\\n".join(submission_parts)
-        task_description = get_task_description()
-        prompt = build_judge_prompt(submission_content, task_description)
-
-        print(f"\\n[LLM Judge] Prompt length: {len(prompt)} chars")
-
-        scores = call_llm_judge(prompt, self.config)
-
-        print(f"\\n{'='*60}")
-        print("LLM JUDGE EVALUATION")
-        print("=" * 60)
-${rubricPrintStatements}
-        print(f"TOTAL: {scores.get('total', 'N/A')}/${totalPoints}")
-        print(f"\\nFeedback: {scores.get('feedback', 'N/A')}")
-        print("=" * 60)
-
-        # Assert minimum score (50%)
-        total = scores.get("total", 0)
-        min_score = ${Math.floor(totalPoints / 2)}
-        assert total >= min_score, f"Score too low: {total}/${totalPoints}. Feedback: {scores.get('feedback', '')}"
-
-
-# =============================================================================
-# Test Runner
-# =============================================================================
-
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "-rA"])
-`;
-}
 
 // ============================================
 // Preview Modal
@@ -1015,15 +665,11 @@ function generateStructurePreview() {
   let html = `<div class="structure-tree">
     <div class="tree-item folder">📁 ${taskId}/</div>
     <div class="tree-item file">📄 task.yaml</div>
-    <div class="tree-item file">📄 solution.sh</div>
-    <div class="tree-item file">📄 Dockerfile</div>
-    <div class="tree-item file">📄 docker-compose.yaml</div>
-    <div class="tree-item file">📄 run-tests.sh</div>
-    <div class="tree-item folder">📁 tests/</div>
-    <div class="tree-item file" style="padding-left: 2.5rem;">📄 test_outputs.py</div>`;
+    <div class="tree-item file">📄 solution.sh</div>`;
 
   if (state.referenceFiles.length > 0) {
     html += `<div class="tree-item folder">📁 data/</div>`;
+    html += `<div class="tree-item file" style="padding-left: 2.5rem;">📋 metadata.json</div>`;
     state.referenceFiles.forEach(f => {
       const ext = f.name.split('.').pop().toLowerCase();
       const icon = FILE_ICONS[ext] || FILE_ICONS.default;
@@ -1031,7 +677,8 @@ function generateStructurePreview() {
     });
   }
 
-  html += `<div class="tree-item folder" style="color: var(--green);">🔐 solution/ (protected)</div>`;
+  html += `<div class="tree-item folder" style="color: var(--green);">🔐 solution/</div>`;
+  html += `<div class="tree-item file" style="padding-left: 2.5rem; color: var(--green);">📋 metadata.json</div>`;
   state.solutionFiles.forEach(f => {
     const ext = f.name.split('.').pop().toLowerCase();
     const icon = FILE_ICONS[ext] || FILE_ICONS.default;
@@ -1043,16 +690,83 @@ function generateStructurePreview() {
 }
 
 function generateTaskId() {
-  const occupation = document.getElementById('occupation').value;
-  const timestamp = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-  const slug = occupation.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 30);
+  const taskName = document.getElementById('taskName').value.trim();
   const hash = Math.random().toString(36).slice(2, 8);
-  return `gdpval-${slug}-${hash}`;
+  return `${hash}_${taskName}`;
 }
 
 // ============================================
 // ZIP Generation & Download
 // ============================================
+
+function generateFileMetadata(files) {
+  return files.map(file => {
+    const extension = file.name.split('.').pop().toLowerCase();
+    return {
+      name: file.name,
+      size: file.size,
+      extension: extension,
+      type: file.type || 'application/octet-stream'
+    };
+  });
+}
+
+async function saveToDatabase(taskId) {
+  if (!API_CONFIG.enabled) {
+    console.log('API calls disabled, skipping database save');
+    return { success: true, skipped: true };
+  }
+
+  const taskName = document.getElementById('taskName').value.trim();
+  const sector = document.getElementById('sector').value;
+  const occupation = document.getElementById('occupation').value;
+  const instruction = document.getElementById('instruction').value.trim();
+  const difficulty = document.getElementById('difficulty').value;
+  const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
+  const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
+  const rubrics = getRubricData();
+
+  const payload = {
+    task_id: taskId,
+    task_name: taskName,
+    sector: sector,
+    occupation: occupation,
+    instruction: instruction,
+    difficulty: difficulty,
+    expert_time_min: Math.round(expertTimeHours * 60),
+    junior_time_min: Math.round(juniorTimeHours * 60),
+    rubrics: rubrics.map(r => ({
+      name: r.name,
+      description: r.description || null,
+      points: r.points
+    })),
+    solution_files: generateFileMetadata(state.solutionFiles),
+    data_files: generateFileMetadata(state.referenceFiles),
+    task_yaml: generateTaskYaml(),
+    solution_sh: generateSolutionSh()
+  };
+
+  try {
+    const response = await fetch(`${API_CONFIG.baseUrl}/api/tasks`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.detail || 'Failed to save to database');
+    }
+
+    const result = await response.json();
+    return { success: true, data: result };
+  } catch (error) {
+    console.error('Database save error:', error);
+    return { success: false, error: error.message };
+  }
+}
 
 async function generateAndDownload() {
   if (!validateForm()) return;
@@ -1067,28 +781,25 @@ async function generateAndDownload() {
     const taskId = generateTaskId();
     const folder = zip.folder(taskId);
 
-    // Add core files
+    // Add core files (only task.yaml and solution.sh)
     folder.file('task.yaml', generateTaskYaml());
     folder.file('solution.sh', generateSolutionSh());
-    folder.file('Dockerfile', generateDockerfile());
-    folder.file('docker-compose.yaml', generateDockerCompose());
-    folder.file('run-tests.sh', generateRunTests());
 
-    // Add tests folder
-    const tests = folder.folder('tests');
-    tests.file('test_outputs.py', generateTestFile());
-
-    // Add data folder with reference files
+    // Add data folder with reference files and metadata
     if (state.referenceFiles.length > 0) {
       const data = folder.folder('data');
+      const dataMetadata = generateFileMetadata(state.referenceFiles);
+      data.file('metadata.json', JSON.stringify(dataMetadata, null, 2));
       for (const file of state.referenceFiles) {
         const content = await readFileAsArrayBuffer(file);
         data.file(file.name, content);
       }
     }
 
-    // Add solution folder with solution files
+    // Add solution folder with solution files and metadata
     const solution = folder.folder('solution');
+    const solutionMetadata = generateFileMetadata(state.solutionFiles);
+    solution.file('metadata.json', JSON.stringify(solutionMetadata, null, 2));
     for (const file of state.solutionFiles) {
       const content = await readFileAsArrayBuffer(file);
       solution.file(file.name, content);
@@ -1097,7 +808,7 @@ async function generateAndDownload() {
     // Generate ZIP
     const blob = await zip.generateAsync({ type: 'blob' });
 
-    // Download
+    // Download ZIP
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
@@ -1107,10 +818,15 @@ async function generateAndDownload() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    showToast('Task package generated successfully!', 'success');
+    // Save to database
+    btn.innerHTML = '<span class="btn-icon">💾</span> Saving to database...';
+    const dbResult = await saveToDatabase(taskId);
 
-    // Close modal if open
+    // Close preview modal if open
     document.getElementById('previewModal').classList.remove('active');
+
+    // Show success modal
+    showSuccessModal(taskId, dbResult);
 
   } catch (error) {
     console.error('Generation error:', error);
@@ -1119,6 +835,37 @@ async function generateAndDownload() {
     btn.innerHTML = originalText;
     btn.disabled = false;
   }
+}
+
+function showSuccessModal(taskId, dbResult) {
+  const modal = document.getElementById('successModal');
+  const taskIdDisplay = document.getElementById('successTaskId');
+  const dbStatus = document.getElementById('dbStatus');
+
+  taskIdDisplay.textContent = taskId;
+
+  if (dbResult.skipped) {
+    dbStatus.innerHTML = '<span style="color: var(--text-muted);">Database save skipped (API disabled)</span>';
+  } else if (dbResult.success) {
+    dbStatus.innerHTML = '<span style="color: var(--green);">Successfully saved to database</span>';
+  } else {
+    dbStatus.innerHTML = `<span style="color: var(--red);">Database save failed: ${dbResult.error}</span>`;
+  }
+
+  modal.classList.add('active');
+
+  // Close button handler
+  const closeBtn = document.getElementById('closeSuccessModal');
+  const backdrop = modal.querySelector('.modal-backdrop');
+
+  const closeHandler = () => {
+    modal.classList.remove('active');
+    closeBtn.removeEventListener('click', closeHandler);
+    backdrop.removeEventListener('click', closeHandler);
+  };
+
+  closeBtn.addEventListener('click', closeHandler);
+  backdrop.addEventListener('click', closeHandler);
 }
 
 function readFileAsArrayBuffer(file) {
