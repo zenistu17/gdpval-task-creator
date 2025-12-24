@@ -1098,389 +1098,91 @@ function initializeKeyboardShortcuts() {
 // Reference Examples Modal
 // ============================================
 
-const SAMPLE_FILES = {
+var SAMPLE_FILES = {
   '1-task-description': {
     name: 'SAMPLE-TASK.txt',
-    content: `==========================================
-  SAMPLE TASK DESCRIPTION
-==========================================
-
-Below is an example of how to fill out the task form fields.
-
-
-TASK NAME:
-----------
-film-promo-reel-editing
-
-  - Use lowercase letters only
-  - Use hyphens instead of spaces
-  - Keep it short but descriptive
-  - Examples: "contract-review", "patient-triage", "invoice-processing"
-
-
-SECTOR:
--------
-Arts, Entertainment, and Recreation
-
-  - Choose the industry this task belongs to
-  - Pick from the dropdown options
-
-
-OCCUPATION:
------------
-Film and Video Editors
-
-  - Choose the job role that would do this task
-  - Pick from the dropdown options
-
-
-DIFFICULTY:
------------
-Hard
-
-  - Medium: Complex tasks requiring expertise (7-15 hours for an expert)
-  - Hard: Very complex, requires deep expertise (15+ hours for an expert)
-
-  NOTE: All tasks must take at least 7 hours for an expert to complete.
-        Simple or quick tasks are not accepted.
-
-
-TASK DESCRIPTION:
------------------
-
-*** IMPORTANT: YOUR TASK DESCRIPTION MUST BE 100% HANDWRITTEN ***
-*** AI-GENERATED DESCRIPTIONS ARE NOT ALLOWED AND WILL BE REJECTED ***
-
-Write a clear, detailed description of what the AI needs to do.
-Include:
-
-1. CONTEXT - Who is the AI acting as?
-   "You are a Film and Video Editor specializing in social media content..."
-
-2. INPUT DATA - What files will the AI use?
-   "You are given raw video clips, audio tracks, and fonts..."
-
-3. REQUIRED OUTPUT - What should the AI produce?
-   "Create two PSA videos - one vertical (9:16) and one horizontal (16:9)..."
-
-4. SPECIFIC REQUIREMENTS - Any rules or constraints?
-   "Use FFmpeg for processing, include text overlays, H.264 codec..."
-
-
-EXAMPLE DESCRIPTION (Film Promo Reel Editing):
-----------------------------------------------
-You are a Film and Video Editor specializing in social media content.
-A nonprofit organization needs viral social awareness videos for their
-"Disconnect to Connect" campaign about digital wellness and reducing
-screen time.
-
-Your task is to create two engaging, impactful PSA videos:
-- One vertical (9:16) for mobile social media platforms
-- One horizontal (16:9) for web and presentations
-
-## Required Deliverables
-
-1. viral_vertical.mp4 - Vertical format video:
-   - Resolution: 1080x1920 (9:16 aspect ratio)
-   - Duration: 15-30 seconds
-   - Must include trending-style editing
-
-2. viral_horizontal.mp4 - Horizontal format video:
-   - Resolution: 1920x1080 (16:9 aspect ratio)
-   - Duration: 30-60 seconds
-
-3. thumbnail_horizontal.png - Web thumbnail (1280x720)
-
-## Technical Requirements
-
-- Use FFmpeg for video processing
-- Vertical: H.264, CRF 20, max 50MB file size
-- Horizontal: H.264, CRF 18, max 100MB file size
-- Audio: AAC
-- Include text overlays that communicate message without sound
-
-
-==========================================
-  HOW TO WRITE A GOOD TASK DESCRIPTION
-==========================================
-
-*** REMEMBER: WRITE EVERYTHING BY HAND - NO AI GENERATION ***
-
-1. BE SPECIFIC - Include exact specs, formats, dimensions
-2. DEFINE THE ROLE - Who is the AI acting as?
-3. LIST EXACT OUTPUTS - What files should be created?
-4. SET CLEAR CONSTRAINTS - Technical requirements
-5. MAKE IT COMPLEX ENOUGH - Must require 7+ hours for an expert`
+    path: 'samples/1-task-description/SAMPLE-TASK.txt'
   },
   '2-reference-files': {
     name: 'README.txt',
-    content: `==========================================
-  REFERENCE FILES - WHAT TO UPLOAD
-==========================================
-
-Reference files are the INPUT data that the AI will use to
-complete the task. These are the files the AI can see and work with.
-
-
-*** IMPORTANT: USE PUBLIC DOMAIN DATA ONLY ***
-
-Do NOT create synthetic/fake data. Use real, publicly available
-datasets and files. Examples of public domain sources:
-
-- Pexels.com (free stock videos/images)
-- Pixabay.com (free stock media)
-- Archive.org (public domain content)
-- Kaggle.com (public datasets)
-- Government open data portals
-- Creative Commons licensed content
-
-
-WHAT TO INCLUDE:
-----------------
-
-Upload any files the AI needs to do the task:
-
-- Documents: PDF, DOCX, TXT files
-- Data: CSV, JSON, XLSX spreadsheets
-- Images: PNG, JPG (for image-related tasks)
-- Audio: MP3, WAV (for audio/transcription tasks)
-- Video: MP4, MOV (for video editing tasks)
-
-
-EXAMPLE FOR THE FILM PROMO REEL TASK:
--------------------------------------
-
-For the "film-promo-reel-editing" task, you would upload:
-
-1. raw_clips/ folder with video clips:
-   - people_on_phones.mp4 (from Pexels)
-   - nature_scenery.mp4 (from Pexels)
-   - family_moments.mp4 (from Pexels)
-
-2. audio/ folder:
-   - emotional_music.mp3 (royalty-free from Pixabay)
-   - notification_sound.mp3 (Creative Commons)
-
-3. fonts/ folder:
-   - Montserrat-Bold.ttf (Google Fonts - open source)
-
-
-WHERE TO FIND PUBLIC DOMAIN CONTENT:
-------------------------------------
-
-VIDEO:  pexels.com/videos, pixabay.com/videos
-AUDIO:  pixabay.com/music, freesound.org
-IMAGES: unsplash.com, pexels.com, pixabay.com
-DATA:   kaggle.com/datasets, data.gov
-FONTS:  fonts.google.com, fontsquirrel.com
-
-
-TIPS:
------
-
-1. USE PUBLIC DOMAIN SOURCES ONLY
-2. INCLUDE ALL FILES MENTIONED IN YOUR TASK
-3. ORGANIZE WITH FOLDERS (raw_clips/, audio/, fonts/)
-4. NAME FILES CLEARLY
-5. TEST YOUR FILES BEFORE UPLOADING`
+    path: 'samples/2-reference-files/README.txt'
   },
   '3-solution-files': {
     name: 'README.txt',
-    content: `==========================================
-  SOLUTION FILES - WHAT TO UPLOAD
-==========================================
-
-Solution files are the CORRECT ANSWERS - what the AI should produce
-if it does the task perfectly. These files are hidden from the AI
-and used to check if the AI got it right.
-
-
-WHAT TO INCLUDE:
-----------------
-
-Upload the expected output for the task:
-
-- If task asks for videos → upload the correct videos
-- If task asks for a report → upload the correct report
-- If task asks for analysis → upload the correct analysis
-- If task asks for edited files → upload the correctly edited versions
-
-
-EXAMPLE FOR THE FILM PROMO REEL TASK:
--------------------------------------
-
-For the "film-promo-reel-editing" task, you would upload:
-
-1. viral_vertical.mp4
-   - The correctly edited vertical video (1080x1920)
-   - 15-30 seconds, with all required elements
-   - This is what a perfect submission looks like
-
-2. viral_horizontal.mp4
-   - The correctly edited horizontal video (1920x1080)
-   - 30-60 seconds, with storytelling elements
-
-3. thumbnail_horizontal.png
-   - The correct thumbnail image (1280x720)
-
-
-TIPS:
------
-
-1. CREATE THE SOLUTION YOURSELF FIRST
-   Actually do the task manually to create the correct answer.
-   For a 7+ hour task, this means spending 7+ hours yourself.
-
-2. BE PRECISE
-   The solution should meet all the requirements you specified.
-
-3. MATCH YOUR TASK REQUIREMENTS
-   If your task says "create H.264 video at CRF 20", your
-   solution must be H.264 at CRF 20.
-
-4. INCLUDE ALL REQUIRED OUTPUTS
-   If your task asks for 3 deliverables, include all 3 files.
-
-5. QUALITY MATTERS
-   Your solution sets the standard. Make it professional.`
+    path: 'samples/3-solution-files/README.txt'
   },
   '4-rubrics': {
     name: 'SAMPLE-RUBRICS.txt',
-    content: `==========================================
-  SAMPLE RUBRICS
-==========================================
-
-Rubrics define HOW to score the AI's work. Each rubric is a
-criteria with a point value.
-
-
-EXAMPLE RUBRICS FOR FILM PROMO REEL TASK:
------------------------------------------
-
-1. HOOK EFFECTIVENESS (0-5 points)
-   - 5 pts: Instantly thought-provoking, impossible to scroll past
-   - 4 pts: Strong hook that captures attention within 2 seconds
-   - 3 pts: Decent opening but could be stronger
-   - 2 pts: Slow start, might lose viewers
-   - 1 pt:  No clear hook
-   - 0 pts: Boring or confusing opening
-
-2. EMOTIONAL IMPACT (0-5 points)
-   - 5 pts: Deeply moving, creates genuine emotional response
-   - 4 pts: Strong emotional resonance, memorable
-   - 3 pts: Somewhat impactful, decent emotional arc
-   - 2 pts: Tries to be emotional but falls flat
-   - 1 pt:  No emotional connection
-   - 0 pts: Off-putting or tone-deaf
-
-3. EDITING STYLE (0-5 points)
-   - 5 pts: Perfect modern editing (pacing, effects, transitions)
-   - 4 pts: Good use of editing techniques
-   - 3 pts: Competent editing but not exceptional
-   - 2 pts: Editing feels awkward or distracting
-   - 1 pt:  Poor editing choices
-   - 0 pts: Amateur or broken editing
-
-4. DUAL FORMAT EXECUTION (0-4 points)
-   - 4 pts: Both formats excellent, properly optimized
-   - 3 pts: Both formats good, minor issues
-   - 2 pts: One format good, one weak
-   - 1 pt:  Both formats have significant issues
-   - 0 pts: Missing format or completely wrong specs
-
-5. MESSAGE CLARITY & CTA (0-3 points)
-   - 3 pts: Clear message, memorable CTA, hashtag visible
-   - 2 pts: Message present but could be clearer
-   - 1 pt:  Weak or confusing message/CTA
-   - 0 pts: No clear message or CTA
-
-6. TECHNICAL QUALITY (0-3 points)
-   - 3 pts: Perfect specs, clean exports, proper audio
-   - 2 pts: Minor technical issues
-   - 1 pt:  Noticeable technical problems
-   - 0 pts: Wrong specs or corrupted files
-
-TOTAL: 25 points
-PASSING SCORE: 18 points (72%)
-
-
-==========================================
-  HOW TO WRITE GOOD RUBRICS
-==========================================
-
-1. BE OBJECTIVE
-   Bad:  "Video looks good" (subjective)
-   Good: "Video includes text overlay in first 2 seconds"
-
-2. USE MEASURABLE CRITERIA
-   Bad:  "Editing is mostly right"
-   Good: "Resolution is exactly 1080x1920"
-
-3. ASSIGN FAIR POINT VALUES
-   - Critical requirements: 4-5 points
-   - Important but flexible: 2-3 points
-   - Nice-to-haves: 1-2 points
-
-4. COVER ALL REQUIREMENTS
-   Each requirement should have a rubric.
-
-5. INCLUDE PARTIAL CREDIT
-   Allow partial points for partially correct answers.`
+    path: 'samples/4-rubrics/SAMPLE-RUBRICS.txt'
   }
 };
 
 function initializeExamplesModal() {
-  const modal = document.getElementById('examplesModal');
-  const openBtn = document.getElementById('viewExamplesBtn');
-  const closeBtn = document.getElementById('closeExamplesModal');
-  const closeBtn2 = document.getElementById('closeExamplesBtn');
-  const treeItems = document.querySelectorAll('.tree-item.file');
-  const fileContent = document.getElementById('fileContent');
-  const filePath = document.getElementById('currentFilePath');
+  var modal = document.getElementById('examplesModal');
+  var openBtn = document.getElementById('viewExamplesBtn');
+  var closeBtn = document.getElementById('closeExamplesModal');
+  var closeBtn2 = document.getElementById('closeExamplesBtn');
+  var treeItems = document.querySelectorAll('.tree-item.file');
+  var fileContentEl = document.getElementById('fileContent');
+  var filePathEl = document.getElementById('currentFilePath');
+
+  if (!modal || !openBtn) return;
 
   // Open modal
-  openBtn?.addEventListener('click', () => {
+  openBtn.addEventListener('click', function() {
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
   });
 
   // Close modal
-  const closeModal = () => {
+  function closeModal() {
     modal.classList.remove('active');
     document.body.style.overflow = '';
-  };
+  }
 
-  closeBtn?.addEventListener('click', closeModal);
-  closeBtn2?.addEventListener('click', closeModal);
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (closeBtn2) closeBtn2.addEventListener('click', closeModal);
 
   // Close on overlay click
-  modal?.addEventListener('click', (e) => {
+  modal.addEventListener('click', function(e) {
     if (e.target === modal) {
       closeModal();
     }
   });
 
   // Close on Escape
-  document.addEventListener('keydown', (e) => {
+  document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && modal.classList.contains('active')) {
       closeModal();
     }
   });
 
   // File tree navigation
-  treeItems.forEach(item => {
-    item.addEventListener('click', () => {
+  treeItems.forEach(function(item) {
+    item.addEventListener('click', function() {
       // Remove active from all
-      treeItems.forEach(i => i.classList.remove('active'));
+      treeItems.forEach(function(i) { i.classList.remove('active'); });
       // Add active to clicked
       item.classList.add('active');
 
       // Get folder and load content
-      const folder = item.dataset.folder;
+      var folder = item.dataset.folder;
       if (folder && SAMPLE_FILES[folder]) {
-        const file = SAMPLE_FILES[folder];
-        filePath.textContent = 'samples/' + folder + '/' + file.name;
-        fileContent.textContent = file.content;
+        var file = SAMPLE_FILES[folder];
+        filePathEl.textContent = file.path;
+        fileContentEl.textContent = 'Loading...';
+
+        fetch(file.path)
+          .then(function(response) {
+            if (!response.ok) throw new Error('Not found');
+            return response.text();
+          })
+          .then(function(text) {
+            fileContentEl.textContent = text;
+          })
+          .catch(function() {
+            fileContentEl.textContent = 'Error loading file. Please download the ZIP instead.';
+          });
       }
     });
   });
