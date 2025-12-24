@@ -1479,7 +1479,7 @@ function initializeExamplesModal() {
       const folder = item.dataset.folder;
       if (folder && SAMPLE_FILES[folder]) {
         const file = SAMPLE_FILES[folder];
-        filePath.textContent = \`samples/\${folder}/\${file.name}\`;
+        filePath.textContent = 'samples/' + folder + '/' + file.name;
         fileContent.textContent = file.content;
       }
     });
