@@ -249,6 +249,37 @@ body {
   letter-spacing: 0.02em;
 }
 
+/* Reference Examples Download Button */
+.reference-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: var(--radius-lg);
+  color: var(--purple-light);
+  font-size: 0.95rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.3s var(--ease-out);
+  cursor: pointer;
+}
+
+.reference-btn:hover {
+  background: rgba(168, 85, 247, 0.25);
+  border-color: var(--purple);
+  box-shadow: var(--neon-glow-purple);
+  transform: translateY(-2px);
+}
+
+.reference-btn .ref-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+}
+
 @keyframes fadeSlideDown {
   from {
     opacity: 0;

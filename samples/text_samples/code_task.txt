@@ -1,0 +1,8 @@
+Implement a Python function that finds the longest palindromic substring in a given string. The function should have O(n^2) time complexity or better. Include proper error handling and docstrings.
+
+Example:
+Input: "babad"
+Output: "bab" or "aba"
+
+Input: "cbbd"
+Output: "bb"
