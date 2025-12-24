@@ -1,0 +1,69 @@
+instruction: |-
+  You are a Data Analyst working for a retail company. Your task is to analyze
+  sales data and generate insights for the quarterly business review.
+
+  ## Input Data (in /app/data/)
+
+  1. **sales.csv** - Transaction records with columns:
+     - transaction_id: Unique identifier
+     - date: Transaction date (YYYY-MM-DD)
+     - product_id: Product identifier
+     - category: Product category
+     - quantity: Units sold
+     - unit_price: Price per unit
+     - customer_id: Customer identifier
+
+  2. **products.csv** - Product catalog:
+     - product_id: Product identifier
+     - name: Product name
+     - category: Product category
+     - cost: Manufacturing cost
+
+  ## Required Deliverables
+
+  Create in `/app/output/`:
+
+  1. **summary_report.json** - JSON file containing:
+     - total_revenue: Total sales revenue
+     - total_transactions: Number of transactions
+     - top_category: Best-selling category by revenue
+     - top_product: Best-selling product by units
+     - avg_order_value: Average transaction value
+
+  2. **monthly_trends.csv** - Monthly breakdown:
+     - month: Month (YYYY-MM format)
+     - revenue: Total revenue for the month
+     - transactions: Number of transactions
+
+  3. **category_analysis.csv** - Category performance:
+     - category: Product category
+     - revenue: Total revenue
+     - units_sold: Total units
+     - profit_margin: (revenue - cost) / revenue
+
+  ## Technical Requirements
+
+  - Use Python with pandas for data processing
+  - All monetary values should be rounded to 2 decimal places
+  - Dates should be in ISO format
+  - JSON should be properly formatted (indented)
+
+difficulty: medium
+category: data-analysis
+tags:
+  - python
+  - pandas
+  - csv
+  - json
+  - business-intelligence
+  - reporting
+parser_name: pytest
+max_agent_timeout_sec: 1800.0
+max_test_timeout_sec: 300.0
+run_tests_in_same_shell: false
+disable_asciinema: false
+estimated_duration_sec: 3600
+expert_time_estimate_min: 30
+junior_time_estimate_min: 90
+sector: Retail Trade
+occupation: Data Analysts

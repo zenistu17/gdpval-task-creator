@@ -1,58 +1,51 @@
 ==========================================
-  GDPVal Task Creator - Reference Examples
+  GDPVal Task Creator - Reference Example
 ==========================================
 
-This folder contains sample files demonstrating the correct
-format for each task type in the GDPVal Benchmark Suite.
+This folder contains a sample task submission showing
+the correct folder structure and file formats.
 
 FOLDER STRUCTURE:
 -----------------
 
-1. text_samples/
-   - Contains example text files (.txt)
-   - Use for: Text-to-Text, Text-to-Image, Text-to-Audio, Text-to-Video tasks
-
-2. image_samples/
-   - Contains example images (.jpg, .png)
-   - Use for: Image-to-Text, Image-to-Image tasks
-
-3. audio_samples/
-   - Contains example audio files (.mp3, .wav)
-   - Use for: Audio-to-Text tasks
-
-4. video_samples/
-   - Contains example video files (.mp4)
-   - Use for: Video-to-Text tasks
+sample-task/
+├── task.yaml           # Task description, difficulty, metadata
+├── solution.sh         # Reference solution script
+├── Dockerfile          # Container setup
+├── docker-compose.yaml # Docker configuration
+├── run-tests.sh        # Test runner script
+├── data/               # Input files for the task
+│   ├── input.csv
+│   └── config.json
+└── tests/              # Test files
+    └── test_outputs.py
 
 
-NAMING CONVENTION:
-------------------
-Files should be named descriptively to indicate their content.
-Example: "sunset_beach.jpg", "podcast_intro.mp3"
+KEY FILES EXPLAINED:
+--------------------
+
+1. task.yaml
+   - Contains the task instruction/description
+   - Specifies difficulty (easy/medium/hard)
+   - Defines category, tags, sector, occupation
+   - Sets timeout and duration estimates
+
+2. solution.sh
+   - Reference solution that solves the task
+   - Used to validate the task is solvable
+   - Should produce correct outputs in /app/output/
+
+3. data/
+   - All input files the agent will use
+   - CSVs, JSONs, images, audio, video, etc.
+   - Files are copied to /app/data/ in container
+
+4. tests/test_outputs.py
+   - Pytest tests to validate the solution
+   - Checks output files exist and are correct
+   - Can use LLM judge for subjective evaluation
 
 
-TASK EXAMPLES:
---------------
-
-Text-to-Text:
-  Input: text_samples/story_prompt.txt
-  Expected: A continuation or response to the prompt
-
-Text-to-Image:
-  Input: text_samples/image_description.txt
-  Expected: Generated image matching the description
-
-Image-to-Text:
-  Input: image_samples/sample_photo.jpg
-  Expected: Description or analysis of the image
-
-Audio-to-Text:
-  Input: audio_samples/speech_sample.mp3
-  Expected: Transcription of the audio
-
-Video-to-Text:
-  Input: video_samples/sample_clip.mp4
-  Expected: Description or summary of the video
-
-
-For more information, visit the GDPVal documentation.
+For more examples, see:
+- https://github.com/parsewave/contributions-doolbarez/pull/5
+- https://github.com/parsewave/contributions-vanosius/pull/3
