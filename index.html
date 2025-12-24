@@ -29,14 +29,15 @@
         <span class="title-line gradient">Creator</span>
       </h1>
       <p class="hero-subtitle">Design professional AI evaluation tasks with precision</p>
-      <a href="reference-examples.zip" download class="reference-btn">
+      <button type="button" class="reference-btn" id="viewExamplesBtn">
         <svg class="ref-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-          <polyline points="7 10 12 15 17 10"/>
-          <line x1="12" y1="15" x2="12" y2="3"/>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
-        <span>Download Reference Examples</span>
-      </a>
+        <span>View Reference Examples</span>
+      </button>
     </div>
 
     <!-- Form Progress Bar -->
@@ -353,6 +354,80 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
 
   <!-- Toast Notifications -->
   <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Reference Examples Modal -->
+  <div class="modal-overlay" id="examplesModal">
+    <div class="terminal-modal">
+      <div class="terminal-header">
+        <div class="terminal-dots">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green"></span>
+        </div>
+        <span class="terminal-title">reference-examples</span>
+        <button class="terminal-close" id="closeExamplesModal">&times;</button>
+      </div>
+      <div class="terminal-body">
+        <div class="terminal-sidebar">
+          <div class="file-tree">
+            <div class="tree-item folder open" data-path="samples">
+              <span class="tree-icon">📁</span>
+              <span class="tree-name">samples/</span>
+            </div>
+            <div class="tree-item file" data-path="1-task-description/SAMPLE-TASK.txt" data-folder="1-task-description">
+              <span class="tree-icon">📄</span>
+              <span class="tree-name">1-task-description/</span>
+            </div>
+            <div class="tree-item file" data-path="2-reference-files/README.txt" data-folder="2-reference-files">
+              <span class="tree-icon">📁</span>
+              <span class="tree-name">2-reference-files/</span>
+            </div>
+            <div class="tree-item file" data-path="3-solution-files/README.txt" data-folder="3-solution-files">
+              <span class="tree-icon">🔐</span>
+              <span class="tree-name">3-solution-files/</span>
+            </div>
+            <div class="tree-item file" data-path="4-rubrics/SAMPLE-RUBRICS.txt" data-folder="4-rubrics">
+              <span class="tree-icon">📋</span>
+              <span class="tree-name">4-rubrics/</span>
+            </div>
+          </div>
+        </div>
+        <div class="terminal-content">
+          <div class="file-viewer" id="fileViewer">
+            <div class="file-header">
+              <span class="file-path" id="currentFilePath">Select a folder to view its contents</span>
+            </div>
+            <pre class="file-content" id="fileContent">
+╔════════════════════════════════════════════════════════════╗
+║                                                            ║
+║   👋 Welcome to GDPVal Reference Examples                  ║
+║                                                            ║
+║   Click on a folder in the sidebar to view sample          ║
+║   files showing what to upload for each section.           ║
+║                                                            ║
+║   📁 1-task-description/ - How to write task details       ║
+║   📁 2-reference-files/  - Input files for the AI          ║
+║   🔐 3-solution-files/   - Correct answers (hidden from AI)║
+║   📋 4-rubrics/          - Scoring criteria                ║
+║                                                            ║
+╚════════════════════════════════════════════════════════════╝
+            </pre>
+          </div>
+        </div>
+      </div>
+      <div class="terminal-footer">
+        <a href="reference-examples.zip" download class="terminal-btn download">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          Download ZIP
+        </a>
+        <button class="terminal-btn close" id="closeExamplesBtn">Close</button>
+      </div>
+    </div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <script src="script.js"></script>
