@@ -6,37 +6,54 @@ Rubrics define HOW to score the AI's work. Each rubric is a
 criteria with a point value. The AI passes if it scores enough points.
 
 
-EXAMPLE RUBRICS FOR OUR SAMPLE TASK:
-------------------------------------
+EXAMPLE RUBRICS FOR FILM PROMO REEL TASK:
+-----------------------------------------
 
-1. CORRECT TOTAL REVENUE (5 points)
-   - 5 pts: Exact match ($4,509.84)
-   - 3 pts: Within 1% of correct value
-   - 0 pts: Wrong or missing
+1. HOOK EFFECTIVENESS (0-5 points)
+   - 5 pts: Instantly thought-provoking, impossible to scroll past
+   - 4 pts: Strong hook that captures attention within 2 seconds
+   - 3 pts: Decent opening but could be stronger
+   - 2 pts: Slow start, might lose viewers
+   - 1 pt:  No clear hook
+   - 0 pts: Boring or confusing opening
 
-2. TOP PRODUCTS IDENTIFIED (5 points)
-   - 5 pts: All 3 top products correct
-   - 3 pts: 2 out of 3 correct
-   - 1 pt:  1 out of 3 correct
-   - 0 pts: None correct
+2. EMOTIONAL IMPACT (0-5 points)
+   - 5 pts: Deeply moving, creates genuine emotional response
+   - 4 pts: Strong emotional resonance, memorable
+   - 3 pts: Somewhat impactful, decent emotional arc
+   - 2 pts: Tries to be emotional but falls flat
+   - 1 pt:  No emotional connection
+   - 0 pts: Off-putting or tone-deaf
 
-3. CATEGORY BREAKDOWN INCLUDED (3 points)
-   - 3 pts: All categories with correct percentages
-   - 2 pts: Categories listed but percentages off
-   - 0 pts: Missing category breakdown
+3. EDITING STYLE (0-5 points)
+   - 5 pts: Perfect modern editing (pacing, effects, transitions)
+   - 4 pts: Good use of editing techniques for emotional effect
+   - 3 pts: Competent editing but not exceptional
+   - 2 pts: Editing feels awkward or distracting
+   - 1 pt:  Poor editing choices
+   - 0 pts: Amateur or broken editing
 
-4. MONTHLY TREND SHOWN (3 points)
-   - 3 pts: Both months with correct totals
-   - 1 pt:  Months listed but numbers wrong
-   - 0 pts: No monthly breakdown
+4. DUAL FORMAT EXECUTION (0-4 points)
+   - 4 pts: Both formats excellent, properly optimized for each platform
+   - 3 pts: Both formats good, minor optimization issues
+   - 2 pts: One format good, one weak
+   - 1 pt:  Both formats have significant issues
+   - 0 pts: Missing format or completely wrong specs
 
-5. PROFESSIONAL FORMATTING (4 points)
-   - 4 pts: Clear headings, organized sections, easy to read
-   - 2 pts: Some structure but messy
-   - 0 pts: Unformatted wall of text
+5. MESSAGE CLARITY & CTA (0-3 points)
+   - 3 pts: Clear message, memorable CTA, hashtag visible
+   - 2 pts: Message present but could be clearer
+   - 1 pt:  Weak or confusing message/CTA
+   - 0 pts: No clear message or CTA
 
-TOTAL: 20 points
-PASSING SCORE: 14 points (70%)
+6. TECHNICAL QUALITY (0-3 points)
+   - 3 pts: Perfect specs, clean exports, proper audio levels
+   - 2 pts: Minor technical issues
+   - 1 pt:  Noticeable technical problems
+   - 0 pts: Wrong specs or corrupted files
+
+TOTAL: 25 points
+PASSING SCORE: 18 points (72%)
 
 
 ==========================================
@@ -44,17 +61,18 @@ PASSING SCORE: 14 points (70%)
 ==========================================
 
 1. BE OBJECTIVE
-   Bad:  "Report looks good" (subjective)
-   Good: "Report includes executive summary section" (checkable)
+   Bad:  "Video looks good" (subjective)
+   Good: "Video includes text overlay in first 2 seconds" (checkable)
 
 2. USE MEASURABLE CRITERIA
-   Bad:  "Calculations are mostly right"
-   Good: "Total revenue within 1% of correct value"
+   Bad:  "Editing is mostly right"
+   Good: "Resolution is exactly 1080x1920 for vertical format"
 
 3. ASSIGN FAIR POINT VALUES
-   - Critical requirements: More points (5-10)
-   - Nice-to-haves: Fewer points (1-3)
-   - Make passing score reasonable (60-80%)
+   - Critical requirements: More points (4-5)
+   - Important but flexible: Medium points (2-3)
+   - Nice-to-haves: Fewer points (1-2)
+   - Make passing score reasonable (65-80%)
 
 4. COVER ALL REQUIREMENTS
    Each thing you asked for in the task should have a rubric.
@@ -64,34 +82,40 @@ PASSING SCORE: 14 points (70%)
    Not everything is pass/fail. Allow partial points for
    partially correct answers.
 
+6. MIX OBJECTIVE AND SUBJECTIVE
+   - Objective: File exists, correct format, right dimensions
+   - Subjective: Emotional impact, creativity, effectiveness
+   Both are valid - just be clear about criteria.
+
 
 RUBRIC TEMPLATES:
 -----------------
 
-ACCURACY RUBRIC:
-"[Specific value] is correct"
-- Full pts: Exact match
+TECHNICAL SPEC RUBRIC:
+"[Output] meets [specific requirement]"
+- Full pts: Exact match (1080x1920, H.264, etc.)
 - Half pts: Close but not exact
 - 0 pts: Wrong or missing
 
+CREATIVE QUALITY RUBRIC:
+"[Aspect] demonstrates [quality level]"
+- Full pts: Professional/excellent quality
+- Half pts: Acceptable but not great
+- 0 pts: Poor or missing
+
 COMPLETENESS RUBRIC:
-"[Section/Item] is included"
-- Full pts: Present and complete
+"[Deliverable] is included and complete"
+- Full pts: Present and fully complete
 - Half pts: Present but incomplete
 - 0 pts: Missing
-
-QUALITY RUBRIC:
-"[Output] is [quality criteria]"
-- Full pts: Meets all criteria
-- Half pts: Meets some criteria
-- 0 pts: Does not meet criteria
 
 
 COMMON MISTAKES TO AVOID:
 -------------------------
 
-1. Too vague: "Good analysis" - what makes it good?
-2. Too strict: Requiring exact wording match
+1. Too vague: "Good video editing" - what makes it good?
+2. Too strict: Requiring pixel-perfect match on creative work
 3. Conflicting: Rubrics that contradict each other
 4. Missing: Not covering all task requirements
 5. Unfair: Impossible to get full points
+6. Unbalanced: All points on one criteria

@@ -7,7 +7,7 @@ Below is an example of how to fill out the task form fields.
 
 TASK NAME:
 ----------
-quarterly-sales-report-analysis
+film-promo-reel-editing
 
   - Use lowercase letters only
   - Use hyphens instead of spaces
@@ -17,7 +17,7 @@ quarterly-sales-report-analysis
 
 SECTOR:
 -------
-Retail Trade
+Arts, Entertainment, and Recreation
 
   - Choose the industry this task belongs to
   - Pick from the dropdown options
@@ -26,7 +26,7 @@ Retail Trade
 
 OCCUPATION:
 -----------
-Data Analysts
+Film and Video Editors
 
   - Choose the job role that would do this task
   - Pick from the dropdown options
@@ -35,72 +35,147 @@ Data Analysts
 
 DIFFICULTY:
 -----------
-Medium
+Hard
 
-  - Easy: Simple, straightforward tasks (under 30 mins)
-  - Medium: Moderate complexity, requires some expertise (30-90 mins)
-  - Hard: Complex, requires deep expertise (90+ mins)
+  - Medium: Complex tasks requiring expertise (7-15 hours for an expert)
+  - Hard: Very complex, requires deep expertise (15+ hours for an expert)
+
+  NOTE: All tasks must take at least 7 hours for an expert to complete.
+        Simple or quick tasks are not accepted.
 
 
 TASK DESCRIPTION:
 -----------------
+
+*** IMPORTANT: YOUR TASK DESCRIPTION MUST BE 100% HANDWRITTEN ***
+*** AI-GENERATED DESCRIPTIONS ARE NOT ALLOWED AND WILL BE REJECTED ***
+
 Write a clear, detailed description of what the AI needs to do.
 Include:
 
 1. CONTEXT - Who is the AI acting as?
-   "You are a Data Analyst working for a retail company..."
+   "You are a Film and Video Editor specializing in social media content..."
 
 2. INPUT DATA - What files will the AI use?
-   "You are given sales.csv containing transaction records..."
+   "You are given raw video clips, audio tracks, and fonts..."
 
 3. REQUIRED OUTPUT - What should the AI produce?
-   "Create a summary report with total revenue, top products..."
+   "Create two PSA videos - one vertical (9:16) and one horizontal (16:9)..."
 
 4. SPECIFIC REQUIREMENTS - Any rules or constraints?
-   "Round all numbers to 2 decimal places..."
+   "Use FFmpeg for processing, include text overlays, H.264 codec..."
 
 
-EXAMPLE DESCRIPTION:
---------------------
-You are a Data Analyst at a retail company. Your manager needs a
-quarterly sales report for the upcoming board meeting.
+EXAMPLE DESCRIPTION (Film Promo Reel Editing):
+----------------------------------------------
+You are a Film and Video Editor specializing in social media content.
+A nonprofit organization needs viral social awareness videos for their
+"Disconnect to Connect" campaign about digital wellness and reducing
+screen time.
 
-You are given:
-- sales.csv: Transaction records with date, product, quantity, price
-- products.csv: Product catalog with names and categories
+All provided footage has already been reviewed and approved by the
+campaign stakeholders.
 
-Create the following:
-1. A summary showing total revenue and top 5 products
-2. A chart showing monthly sales trends
-3. A breakdown by product category
+Your task is to create two engaging, impactful PSA videos from the
+provided footage:
+- One vertical (9:16) for mobile social media platforms
+- One horizontal (16:9) for web and presentations
 
-Requirements:
-- Use clear headings and formatting
-- Include percentage changes from previous period
-- Highlight any unusual patterns
+The videos should be attention-grabbing, emotionally resonant, and
+optimized for social media sharing.
+
+## Campaign: "Disconnect to Connect"
+A social awareness campaign encouraging people to put down their phones
+and engage with real life. The footage includes:
+- People absorbed in phones (ignoring surroundings)
+- Nature and outdoor scenes
+- Human connection moments (without phones)
+- City life and crowds
+- Emotional transition moments
+
+## Input Materials
+
+1. raw_clips/ - Video clips including:
+   - People on phones (various scenarios)
+   - Nature scenery (forests, beaches, sunsets)
+   - Social gatherings and family moments
+   - Urban environment scenes
+   - Emotional reaction shots
+
+2. audio/ - Music and sound elements:
+   - Emotional music tracks (melancholic to hopeful)
+   - Phone/tech notification sounds
+
+3. fonts/ - Typography assets:
+   - Montserrat Bold for text overlays
+
+## Required Deliverables
+
+1. viral_vertical.mp4 - Vertical format video:
+   - Resolution: 1080x1920 (9:16 aspect ratio)
+   - Duration: 15-30 seconds
+   - Optimized for mobile social media platforms
+   - Must include trending-style editing (quick cuts, zoom effects,
+     text overlays)
+
+2. viral_horizontal.mp4 - Horizontal format video:
+   - Resolution: 1920x1080 (16:9 aspect ratio)
+   - Duration: 30-60 seconds
+   - Optimized for web/presentations
+   - Can include more storytelling elements
+
+3. thumbnail_horizontal.png - Web thumbnail (1280x720)
+
+## Technical Requirements
+
+- Use FFmpeg for video processing
+- Vertical: H.264, CRF 20, max 50MB file size
+- Horizontal: H.264, CRF 18, max 100MB file size
+- Audio: AAC
+- Include text overlays that communicate message without sound
+
+## Creative Guidelines
+
+- Start with an intriguing on-screen question in the first 1-2 seconds
+- Use trending editing styles (jump cuts, zoom punches, text pop-ups)
+- Build emotional contrast: isolation vs connection
+- End with clear call-to-action (campaign hashtag)
+- Make it shareable - message should be universal
+- NO VOICEOVER - rely on music, visuals, and text overlays only
 
 
 ==========================================
   HOW TO WRITE A GOOD TASK DESCRIPTION
 ==========================================
 
+*** REMEMBER: WRITE EVERYTHING BY HAND - NO AI GENERATION ***
+
 1. BE SPECIFIC
-   Bad:  "Analyze the data"
-   Good: "Calculate total revenue and identify the top 3 selling products"
+   Bad:  "Edit the videos"
+   Good: "Create 1080x1920 vertical video with zoom effects, text
+          overlays, and emotional music transitions"
 
 2. DEFINE THE ROLE
-   Bad:  "Do accounting work"
-   Good: "You are an Accountant preparing monthly reconciliation"
+   Bad:  "Do video editing work"
+   Good: "You are a Film and Video Editor specializing in social
+          media content for nonprofit campaigns"
 
 3. LIST EXACT OUTPUTS
-   Bad:  "Create a report"
-   Good: "Create a PDF report with: executive summary, data tables,
-          recommendations section"
+   Bad:  "Create some videos"
+   Good: "Create viral_vertical.mp4 (1080x1920, 15-30 sec, H.264,
+          CRF 20) and viral_horizontal.mp4 (1920x1080, 30-60 sec)"
 
 4. SET CLEAR CONSTRAINTS
-   Bad:  "Make it professional"
-   Good: "Use formal language, no bullet points, maximum 2 pages"
+   Bad:  "Make it look good"
+   Good: "Use FFmpeg, H.264 codec, include text overlays readable
+          without sound, max 50MB file size"
 
 5. MATCH REAL WORK
    Think: "What would a professional actually do in this job?"
-   The task should mirror real workplace scenarios.
+   The task should mirror real workplace scenarios that take
+   significant time and expertise (7+ hours minimum).
+
+6. MAKE IT COMPLEX ENOUGH
+   The task must require at least 7 hours for an expert.
+   Include multiple deliverables, technical requirements,
+   and creative decisions.
