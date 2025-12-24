@@ -1184,3 +1184,48 @@ function initializeExamplesModal() {
     });
   });
 }
+
+// ============================================
+// Help Button Tooltips - Dynamic Positioning
+// ============================================
+
+function initializeHelpTooltips() {
+  const helpButtons = document.querySelectorAll('.help-btn');
+  
+  helpButtons.forEach(btn => {
+    // Create tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.className = 'help-tooltip';
+    tooltip.textContent = btn.getAttribute('data-tooltip');
+    document.body.appendChild(tooltip);
+    
+    btn.addEventListener('mouseenter', (e) => {
+      const rect = btn.getBoundingClientRect();
+      const tooltipRect = tooltip.getBoundingClientRect();
+      
+      // Position above the button, centered
+      let left = rect.left + (rect.width / 2) - 150; // 150 = half of tooltip width (300px)
+      let top = rect.top - 10;
+      
+      // Keep within viewport horizontally
+      if (left < 10) left = 10;
+      if (left + 300 > window.innerWidth - 10) left = window.innerWidth - 310;
+      
+      // Position tooltip
+      tooltip.style.left = left + 'px';
+      tooltip.style.bottom = (window.innerHeight - top) + 'px';
+      tooltip.style.top = 'auto';
+      tooltip.classList.add('visible');
+    });
+    
+    btn.addEventListener('mouseleave', () => {
+      tooltip.classList.remove('visible');
+    });
+  });
+}
+
+// Add to initialization
+document.addEventListener('DOMContentLoaded', () => {
+  // Small delay to ensure DOM is fully ready
+  setTimeout(initializeHelpTooltips, 100);
+});
