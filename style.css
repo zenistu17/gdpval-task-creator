@@ -1871,3 +1871,121 @@ input#diffHard:checked + .difficulty-option .diff-dot {
     width: 100%;
   }
 }
+
+/* ============================================
+   Help Buttons & Tooltips
+   ============================================ */
+
+.help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  margin-left: 6px;
+  padding: 0;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  border-radius: 50%;
+  color: var(--purple-light);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  vertical-align: middle;
+}
+
+.help-btn:hover {
+  background: rgba(168, 85, 247, 0.4);
+  border-color: var(--purple);
+  color: white;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.5);
+}
+
+.help-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 12px 16px;
+  background: #1a1a2e;
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.5;
+  white-space: normal;
+  width: 280px;
+  max-width: 90vw;
+  text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 20px rgba(168, 85, 247, 0.2);
+  pointer-events: none;
+}
+
+.help-btn::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: rgba(168, 85, 247, 0.3);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.2s ease;
+  z-index: 1001;
+}
+
+.help-btn:hover::after,
+.help-btn:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+.help-btn:hover::before,
+.help-btn:focus::before {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Hero help text */
+.hero-help-text {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin-top: 12px;
+}
+
+.inline-help-link {
+  background: none;
+  border: none;
+  color: var(--purple-light);
+  font-size: inherit;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
+}
+
+.inline-help-link:hover {
+  color: var(--purple);
+  text-shadow: 0 0 8px rgba(168, 85, 247, 0.5);
+}
+
+/* Ensure help button works in upload titles */
+.upload-title {
+  display: inline-flex;
+  align-items: center;
+}
+
+.upload-title .help-btn {
+  margin-left: 8px;
+}

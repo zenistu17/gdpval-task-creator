@@ -560,7 +560,7 @@ function generateTaskYaml() {
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
-  const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value || 'medium';
+  const difficulty = 'hard'; // All GDPVal tasks are hard by default
   // Time inputs are now in hours - convert to minutes for YAML
   const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
   const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
@@ -869,7 +869,7 @@ async function saveToDatabase(taskId) {
   const sector = document.getElementById('sector').value;
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
-  const difficulty = document.querySelector('input[name="difficulty"]:checked')?.value || 'medium';
+  const difficulty = 'hard'; // All GDPVal tasks are hard by default
   const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
   const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
   const rubrics = getRubricData();
@@ -1062,14 +1062,11 @@ function showToast(message, type = 'info') {
 }
 
 // ============================================
-// Difficulty Toggle
+// Difficulty Toggle (removed - all tasks are hard by default)
 // ============================================
 
 function initializeDifficultyToggle() {
-  const difficultyInputs = document.querySelectorAll('input[name="difficulty"]');
-  difficultyInputs.forEach(input => {
-    input.addEventListener('change', updateProgress);
-  });
+  // No-op: difficulty is now always 'hard'
 }
 
 // ============================================
