@@ -1,0 +1,106 @@
+==========================================
+  SAMPLE TASK DESCRIPTION
+==========================================
+
+Below is an example of how to fill out the task form fields.
+
+
+TASK NAME:
+----------
+quarterly-sales-report-analysis
+
+  - Use lowercase letters only
+  - Use hyphens instead of spaces
+  - Keep it short but descriptive
+  - Examples: "contract-review", "patient-triage", "invoice-processing"
+
+
+SECTOR:
+-------
+Retail Trade
+
+  - Choose the industry this task belongs to
+  - Pick from the dropdown options
+  - Examples: Healthcare, Finance, Legal, Education, Technology
+
+
+OCCUPATION:
+-----------
+Data Analysts
+
+  - Choose the job role that would do this task
+  - Pick from the dropdown options
+  - Examples: Accountants, Nurses, Lawyers, Teachers, Engineers
+
+
+DIFFICULTY:
+-----------
+Medium
+
+  - Easy: Simple, straightforward tasks (under 30 mins)
+  - Medium: Moderate complexity, requires some expertise (30-90 mins)
+  - Hard: Complex, requires deep expertise (90+ mins)
+
+
+TASK DESCRIPTION:
+-----------------
+Write a clear, detailed description of what the AI needs to do.
+Include:
+
+1. CONTEXT - Who is the AI acting as?
+   "You are a Data Analyst working for a retail company..."
+
+2. INPUT DATA - What files will the AI use?
+   "You are given sales.csv containing transaction records..."
+
+3. REQUIRED OUTPUT - What should the AI produce?
+   "Create a summary report with total revenue, top products..."
+
+4. SPECIFIC REQUIREMENTS - Any rules or constraints?
+   "Round all numbers to 2 decimal places..."
+
+
+EXAMPLE DESCRIPTION:
+--------------------
+You are a Data Analyst at a retail company. Your manager needs a
+quarterly sales report for the upcoming board meeting.
+
+You are given:
+- sales.csv: Transaction records with date, product, quantity, price
+- products.csv: Product catalog with names and categories
+
+Create the following:
+1. A summary showing total revenue and top 5 products
+2. A chart showing monthly sales trends
+3. A breakdown by product category
+
+Requirements:
+- Use clear headings and formatting
+- Include percentage changes from previous period
+- Highlight any unusual patterns
+
+
+==========================================
+  HOW TO WRITE A GOOD TASK DESCRIPTION
+==========================================
+
+1. BE SPECIFIC
+   Bad:  "Analyze the data"
+   Good: "Calculate total revenue and identify the top 3 selling products"
+
+2. DEFINE THE ROLE
+   Bad:  "Do accounting work"
+   Good: "You are an Accountant preparing monthly reconciliation"
+
+3. LIST EXACT OUTPUTS
+   Bad:  "Create a report"
+   Good: "Create a PDF report with: executive summary, data tables,
+          recommendations section"
+
+4. SET CLEAR CONSTRAINTS
+   Bad:  "Make it professional"
+   Good: "Use formal language, no bullet points, maximum 2 pages"
+
+5. MATCH REAL WORK
+   Think: "What would a professional actually do in this job?"
+   The task should mirror real workplace scenarios.

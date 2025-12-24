@@ -1,4 +1,4 @@
-product_id,name,category,cost
+product_id,product_name,category,cost_price
 PROD001,Wireless Headphones,Electronics,120.00
 PROD002,Cotton T-Shirt,Clothing,15.00
 PROD003,4K Monitor,Electronics,450.00
@@ -6,6 +6,3 @@ PROD004,Throw Pillow,Home,12.00
 PROD005,Denim Jeans,Clothing,35.00
 PROD006,Table Lamp,Home,25.00
 PROD007,Winter Jacket,Clothing,65.00
-PROD008,Gaming Laptop,Electronics,950.00
-PROD009,Kitchen Towels,Home,8.00
-PROD010,Bluetooth Speaker,Electronics,180.00

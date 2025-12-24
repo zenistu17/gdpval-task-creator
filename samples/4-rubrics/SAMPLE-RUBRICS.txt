@@ -1,0 +1,97 @@
+==========================================
+  SAMPLE RUBRICS
+==========================================
+
+Rubrics define HOW to score the AI's work. Each rubric is a
+criteria with a point value. The AI passes if it scores enough points.
+
+
+EXAMPLE RUBRICS FOR OUR SAMPLE TASK:
+------------------------------------
+
+1. CORRECT TOTAL REVENUE (5 points)
+   - 5 pts: Exact match ($4,509.84)
+   - 3 pts: Within 1% of correct value
+   - 0 pts: Wrong or missing
+
+2. TOP PRODUCTS IDENTIFIED (5 points)
+   - 5 pts: All 3 top products correct
+   - 3 pts: 2 out of 3 correct
+   - 1 pt:  1 out of 3 correct
+   - 0 pts: None correct
+
+3. CATEGORY BREAKDOWN INCLUDED (3 points)
+   - 3 pts: All categories with correct percentages
+   - 2 pts: Categories listed but percentages off
+   - 0 pts: Missing category breakdown
+
+4. MONTHLY TREND SHOWN (3 points)
+   - 3 pts: Both months with correct totals
+   - 1 pt:  Months listed but numbers wrong
+   - 0 pts: No monthly breakdown
+
+5. PROFESSIONAL FORMATTING (4 points)
+   - 4 pts: Clear headings, organized sections, easy to read
+   - 2 pts: Some structure but messy
+   - 0 pts: Unformatted wall of text
+
+TOTAL: 20 points
+PASSING SCORE: 14 points (70%)
+
+
+==========================================
+  HOW TO WRITE GOOD RUBRICS
+==========================================
+
+1. BE OBJECTIVE
+   Bad:  "Report looks good" (subjective)
+   Good: "Report includes executive summary section" (checkable)
+
+2. USE MEASURABLE CRITERIA
+   Bad:  "Calculations are mostly right"
+   Good: "Total revenue within 1% of correct value"
+
+3. ASSIGN FAIR POINT VALUES
+   - Critical requirements: More points (5-10)
+   - Nice-to-haves: Fewer points (1-3)
+   - Make passing score reasonable (60-80%)
+
+4. COVER ALL REQUIREMENTS
+   Each thing you asked for in the task should have a rubric.
+   If you asked for 3 outputs, have rubrics for all 3.
+
+5. INCLUDE PARTIAL CREDIT
+   Not everything is pass/fail. Allow partial points for
+   partially correct answers.
+
+
+RUBRIC TEMPLATES:
+-----------------
+
+ACCURACY RUBRIC:
+"[Specific value] is correct"
+- Full pts: Exact match
+- Half pts: Close but not exact
+- 0 pts: Wrong or missing
+
+COMPLETENESS RUBRIC:
+"[Section/Item] is included"
+- Full pts: Present and complete
+- Half pts: Present but incomplete
+- 0 pts: Missing
+
+QUALITY RUBRIC:
+"[Output] is [quality criteria]"
+- Full pts: Meets all criteria
+- Half pts: Meets some criteria
+- 0 pts: Does not meet criteria
+
+
+COMMON MISTAKES TO AVOID:
+-------------------------
+
+1. Too vague: "Good analysis" - what makes it good?
+2. Too strict: Requiring exact wording match
+3. Conflicting: Rubrics that contradict each other
+4. Missing: Not covering all task requirements
+5. Unfair: Impossible to get full points

@@ -1,0 +1,11 @@
+transaction_id,date,product_id,product_name,category,quantity,unit_price
+TXN001,2024-01-05,PROD001,Wireless Headphones,Electronics,2,299.99
+TXN002,2024-01-08,PROD002,Cotton T-Shirt,Clothing,3,49.99
+TXN003,2024-01-12,PROD003,4K Monitor,Electronics,1,899.99
+TXN004,2024-01-15,PROD004,Throw Pillow,Home,4,29.99
+TXN005,2024-01-18,PROD005,Denim Jeans,Clothing,2,79.99
+TXN006,2024-01-22,PROD001,Wireless Headphones,Electronics,1,299.99
+TXN007,2024-01-25,PROD006,Table Lamp,Home,3,59.99
+TXN008,2024-02-02,PROD002,Cotton T-Shirt,Clothing,5,49.99
+TXN009,2024-02-08,PROD003,4K Monitor,Electronics,2,899.99
+TXN010,2024-02-14,PROD007,Winter Jacket,Clothing,1,129.99
