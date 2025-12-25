@@ -166,7 +166,9 @@ const FILE_CATEGORIES = {
 // ============================================
 
 const API_CONFIG = {
-  baseUrl: window.GDPVAL_API_URL || 'http://localhost:8000',
+  baseUrl: window.GDPVAL_API_URL || '',
+  // Use /api/gdpval prefix for admin server integration
+  apiPrefix: '/api/gdpval',
   enabled: true  // Set to false to disable API calls
 };
 
@@ -190,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initializeTextarea();
   initializeFileUploads();
   initializeRubric();
+  initializeSources();
   initializeFormSubmission();
   initializePreview();
   initializeDifficultyToggle();
@@ -439,6 +442,97 @@ function getRubricData() {
 }
 
 // ============================================
+// Sources Management (Optional)
+// ============================================
+
+function initializeSources() {
+  const addBtn = document.getElementById('addSourceBtn');
+  if (addBtn) {
+    addBtn.addEventListener('click', addSourceItem);
+  }
+}
+
+function addSourceItem() {
+  const container = document.getElementById('sourcesContainer');
+  const index = container.children.length + 1;
+
+  // Get list of all uploaded files for the dropdown
+  const allFiles = [...state.referenceFiles, ...state.solutionFiles].map(f => f.name);
+
+  const item = document.createElement('div');
+  item.className = 'source-item';
+  item.innerHTML = `
+    <div class="source-header">
+      <span class="source-number">Source ${index}</span>
+      <button type="button" class="source-remove">&times;</button>
+    </div>
+    <div class="source-fields">
+      <div class="input-group">
+        <label class="input-label">Source Name</label>
+        <input type="text" class="text-input source-name" placeholder="e.g., National Gallery of Art Open Data" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Source URL</label>
+        <input type="url" class="text-input source-url" placeholder="https://github.com/example/dataset" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">License URL</label>
+        <input type="url" class="text-input source-licence-url" placeholder="https://github.com/example/dataset?tab=license" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">License Type</label>
+        <input type="text" class="text-input source-license" placeholder="e.g., CC0-1.0, MIT, Apache-2.0" required>
+      </div>
+      <div class="input-group">
+        <label class="input-label">Derived Files</label>
+        <div class="derived-files-container">
+          ${allFiles.length > 0 ? allFiles.map(f => `
+            <label class="derived-file-checkbox">
+              <input type="checkbox" value="${f}" class="derived-file-input">
+              <span>${f}</span>
+            </label>
+          `).join('') : '<span class="no-files-hint">Upload files first to select derived files</span>'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  const removeBtn = item.querySelector('.source-remove');
+  removeBtn.addEventListener('click', () => {
+    item.remove();
+    updateSourceNumbers();
+  });
+
+  container.appendChild(item);
+}
+
+function updateSourceNumbers() {
+  const items = document.querySelectorAll('.source-item');
+  items.forEach((item, index) => {
+    const numberSpan = item.querySelector('.source-number');
+    if (numberSpan) {
+      numberSpan.textContent = `Source ${index + 1}`;
+    }
+  });
+}
+
+function getSourcesData() {
+  const items = document.querySelectorAll('.source-item');
+  return Array.from(items).map(item => {
+    const derivedCheckboxes = item.querySelectorAll('.derived-file-input:checked');
+    const derivedFiles = Array.from(derivedCheckboxes).map(cb => cb.value);
+
+    return {
+      source_name: item.querySelector('.source-name')?.value.trim() || '',
+      source_url: item.querySelector('.source-url')?.value.trim() || '',
+      source_licence_url: item.querySelector('.source-licence-url')?.value.trim() || '',
+      source_license: item.querySelector('.source-license')?.value.trim() || '',
+      derived_files: derivedFiles
+    };
+  }).filter(s => s.source_name && s.source_url);
+}
+
+// ============================================
 // Progress Tracking
 // ============================================
 
@@ -561,12 +655,10 @@ function generateTaskYaml() {
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
   const difficulty = 'hard'; // All GDPVal tasks are hard by default
-  // Time inputs are now in hours - convert to minutes for YAML
-  const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
-  const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
-  const expertTimeMin = Math.round(expertTimeHours * 60);
-  const juniorTimeMin = Math.round(juniorTimeHours * 60);
+  // Expert time is fixed at 420 minutes (7 hours)
+  const expertTimeMin = 420;
   const rubrics = getRubricData();
+  const sources = getSourcesData();
 
   const totalPoints = rubrics.reduce((sum, r) => sum + r.points, 0);
 
@@ -580,6 +672,22 @@ function generateTaskYaml() {
 
 Rubric: ${totalPoints} points
 ${rubricStr}`;
+
+  // Build sources YAML
+  let sourcesYaml = 'sources: []';
+  if (sources.length > 0) {
+    sourcesYaml = 'sources:\n' + sources.map(s => {
+      let sourceBlock = `  - source_name: ${s.source_name}\n`;
+      sourceBlock += `    source_url: ${s.source_url}\n`;
+      sourceBlock += `    source_licence_url: ${s.source_licence_url}\n`;
+      sourceBlock += `    source_license: ${s.source_license}\n`;
+      sourceBlock += `    derived_files:\n`;
+      s.derived_files.forEach(f => {
+        sourceBlock += `      - ${f}\n`;
+      });
+      return sourceBlock;
+    }).join('');
+  }
 
   // Generate YAML (task_name not included - stored separately in DB)
   const yaml = `instruction: |-
@@ -596,9 +704,9 @@ run_tests_in_same_shell: false
 disable_asciinema: false
 estimated_duration_sec: ${expertTimeMin * 60}
 expert_time_estimate_min: ${expertTimeMin}
-junior_time_estimate_min: ${juniorTimeMin}
 sector: ${sector}
 occupation: ${occupation}
+${sourcesYaml}
 `;
 
   return yaml;
@@ -827,7 +935,7 @@ function formatDuration(seconds) {
   return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
-async function generateFileMetadata(files) {
+async function generateFileMetadata(files, includeContent = false) {
   const metadataPromises = files.map(async (file) => {
     const extension = file.name.split('.').pop().toLowerCase();
     const category = getFileCategory(extension);
@@ -849,11 +957,14 @@ async function generateFileMetadata(files) {
       additionalMetadata = await getVideoMetadata(file);
     }
 
-    if (additionalMetadata) {
-      return { ...baseMetadata, ...additionalMetadata };
+    let result = additionalMetadata ? { ...baseMetadata, ...additionalMetadata } : baseMetadata;
+
+    // Include base64 content if requested
+    if (includeContent) {
+      result.content = await readFileAsBase64(file);
     }
 
-    return baseMetadata;
+    return result;
   });
 
   return Promise.all(metadataPromises);
@@ -870,13 +981,13 @@ async function saveToDatabase(taskId) {
   const occupation = document.getElementById('occupation').value;
   const instruction = document.getElementById('instruction').value.trim();
   const difficulty = 'hard'; // All GDPVal tasks are hard by default
-  const expertTimeHours = parseFloat(document.getElementById('expertTime').value) || 0;
-  const juniorTimeHours = parseFloat(document.getElementById('juniorTime').value) || 0;
   const rubrics = getRubricData();
+  const sources = getSourcesData();
 
+  // Include file content as base64 for database storage
   const [solutionMetadata, dataMetadata] = await Promise.all([
-    generateFileMetadata(state.solutionFiles),
-    generateFileMetadata(state.referenceFiles)
+    generateFileMetadata(state.solutionFiles, true),
+    generateFileMetadata(state.referenceFiles, true)
   ]);
 
   const payload = {
@@ -886,8 +997,8 @@ async function saveToDatabase(taskId) {
     occupation: occupation,
     instruction: instruction,
     difficulty: difficulty,
-    expert_time_min: Math.round(expertTimeHours * 60),
-    junior_time_min: Math.round(juniorTimeHours * 60),
+    expert_time_min: 420, // Fixed at 7 hours
+    sources: sources,
     rubrics: rubrics.map(r => ({
       name: r.name,
       description: r.description || null,
@@ -900,11 +1011,18 @@ async function saveToDatabase(taskId) {
   };
 
   try {
-    const response = await fetch(`${API_CONFIG.baseUrl}/api/tasks`, {
+    // Get auth headers from parseAuth if available
+    const authHeaders = (typeof parseAuth !== 'undefined' && parseAuth.getAuthHeader)
+      ? parseAuth.getAuthHeader()
+      : {};
+
+    const response = await fetch(`${API_CONFIG.baseUrl}${API_CONFIG.apiPrefix}/tasks`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        ...authHeaders
       },
+      credentials: 'same-origin',
       body: JSON.stringify(payload)
     });
 
@@ -1030,6 +1148,19 @@ function readFileAsArrayBuffer(file) {
     reader.onload = () => resolve(reader.result);
     reader.onerror = reject;
     reader.readAsArrayBuffer(file);
+  });
+}
+
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Remove the data URL prefix (e.g., "data:application/pdf;base64,")
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 }
 

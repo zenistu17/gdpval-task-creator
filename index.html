@@ -3,12 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GDPVal Task Creator</title>
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <title>GDPVal Task Creator - Parsewave</title>
+  <link rel="icon" href="/gdpval/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="/static/sidebar.css">
+  <link rel="stylesheet" href="/gdpval/style.css">
+  <script>
+    // Configure API URL for this server (use relative URL)
+    window.GDPVAL_API_URL = '';
+  </script>
 </head>
 <body>
   <!-- Animated Background -->
@@ -203,59 +208,10 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
         </div>
       </section>
 
-      <!-- Section 4: Time -->
+      <!-- Section 4: Rubric -->
       <section class="form-section">
         <div class="section-badge">
           <span class="badge-number">4</span>
-          <span class="badge-label">Time</span>
-        </div>
-
-        <div class="section-content">
-          <div class="time-notice">
-            <svg class="notice-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"/>
-              <path d="M12 6v6l4 2"/>
-            </svg>
-            <div>
-              <strong>Minimum 7 hours for experts</strong>
-              <p>Tasks must be complex enough to require significant time investment.</p>
-            </div>
-          </div>
-
-          <div class="time-inputs">
-            <div class="time-input-group">
-              <label class="input-label" for="expertTime">
-                <span class="time-icon">🎯</span>
-                Expert Time
-                <button type="button" class="help-btn" data-tooltip="How long would a domain expert (10+ years experience) take to complete this task? Must be at least 7 hours to ensure task complexity.">?</button>
-              </label>
-              <div class="time-input-wrapper">
-                <input type="number" id="expertTime" class="time-input" min="7" max="40" step="0.5" value="7" required>
-                <span class="time-suffix">hours</span>
-              </div>
-              <span class="input-hint">10+ years experience</span>
-            </div>
-
-            <div class="time-input-group">
-              <label class="input-label" for="juniorTime">
-                <span class="time-icon">📚</span>
-                Junior Time
-                <button type="button" class="help-btn" data-tooltip="How long would a junior professional (1-2 years experience) take? Should be longer than expert time. Helps calibrate task difficulty.">?</button>
-              </label>
-              <div class="time-input-wrapper">
-                <input type="number" id="juniorTime" class="time-input" min="7" max="40" step="0.5" value="10" required>
-                <span class="time-suffix">hours</span>
-              </div>
-              <span class="input-hint">1-2 years experience</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Section 5: Rubric -->
-      <section class="form-section">
-        <div class="section-badge">
-          <span class="badge-number">5</span>
           <span class="badge-label">Rubric</span>
         </div>
 
@@ -279,6 +235,33 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
           <div class="rubric-total">
             Total: <span id="rubricTotal">0</span> points
           </div>
+        </div>
+      </section>
+
+      <!-- Section 5: Sources (Optional) -->
+      <section class="form-section">
+        <div class="section-badge">
+          <span class="badge-number">5</span>
+          <span class="badge-label">Sources</span>
+          <span class="badge-optional">(Optional)</span>
+        </div>
+
+        <div class="section-content">
+          <p class="sources-intro">
+            If you used any public domain data, add the source information here.
+            <button type="button" class="help-btn" data-tooltip="Only required if you used publicly available datasets. Include the source name, URL, license information, and which of your uploaded files are derived from this source.">?</button>
+          </p>
+
+          <div class="sources-container" id="sourcesContainer">
+            <!-- Source items will be added here dynamically -->
+          </div>
+
+          <button type="button" class="add-source-btn" id="addSourceBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 5v14M5 12h14"/>
+            </svg>
+            Add Source
+          </button>
         </div>
       </section>
 
@@ -433,6 +416,9 @@ Example: You are a financial analyst tasked with analyzing Q3 earnings data. Usi
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-  <script src="script.js"></script>
+  <script src="/static/sidebar.js"></script>
+  <script src="/static/auth.js"></script>
+  <script src="/static/auth-ui.js"></script>
+  <script src="/gdpval/script.js"></script>
 </body>
 </html>

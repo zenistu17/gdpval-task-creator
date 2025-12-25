@@ -1176,6 +1176,160 @@ input#diffHard:checked + .difficulty-option .diff-dot {
 }
 
 /* ============================================
+   Sources Section (Optional)
+   ============================================ */
+
+.badge-optional {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-left: 8px;
+}
+
+.sources-intro {
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.sources-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.source-item {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all 0.3s var(--ease-out);
+}
+
+.source-item:hover {
+  border-color: rgba(168, 85, 247, 0.4);
+  box-shadow: 0 0 20px rgba(168, 85, 247, 0.15);
+}
+
+.source-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.source-number {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.source-remove {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+
+.source-remove:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.source-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.source-fields .input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.derived-files-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--glass-border);
+}
+
+.derived-file-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.derived-file-checkbox:hover {
+  border-color: var(--purple);
+}
+
+.derived-file-checkbox input:checked + span {
+  color: var(--cyan);
+}
+
+.derived-file-checkbox span {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.no-files-hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  font-style: italic;
+}
+
+.add-source-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px 20px;
+  background: transparent;
+  border: 2px dashed rgba(168, 85, 247, 0.4);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s var(--ease-out);
+}
+
+.add-source-btn:hover {
+  border-color: var(--purple);
+  color: var(--purple-light);
+  background: rgba(168, 85, 247, 0.1);
+  box-shadow: 0 0 25px rgba(168, 85, 247, 0.25);
+}
+
+.add-source-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ============================================
    Form Actions
    ============================================ */
 
