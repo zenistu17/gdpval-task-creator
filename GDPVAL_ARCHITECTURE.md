@@ -70,9 +70,14 @@ The GDPVal Task Creator is a complete end-to-end system for creating, managing, 
     │  - gdpval_data_files (input data)                 │
     │  - gdpval_task_yaml (task definition)             │
     │  - gdpval_solution_sh (solution script)           │
+    │  - gdpval_templates (saved task templates)        │
+    │  - gdpval_task_logs (structured logging)          │
+    │  - gdpval_sectors (sector/occupation data)        │
+    │  - gdpval_servers (pipeline server management)    │
     └───────────────────────────────────────────────────┘
                                │
-                               │ Polled every 10s
+                               │ Queue processor: 30s
+                               │ Independent worker: 10s
                                ▼
     ┌───────────────────────────────────────────────────┐
     │     REMOTE WORKER (on pipeline servers)           │
@@ -120,10 +125,11 @@ The GDPVal Task Creator is a complete end-to-end system for creating, managing, 
   5. Sources (optional, for public domain data)
 
 - **File uploads:**
-  - Reference files → `/app/data/` (inputs for AI)
-  - Solution files → `/tests/solution/` (expected outputs, hidden from AI)
+  - Reference files → stored as BYTEA in PostgreSQL, extracted to `/app/data/` during task processing
+  - Solution files → stored as BYTEA in PostgreSQL, extracted to `{task_dir}/solution_files/` during processing
   - Supports: PDF, DOCX, CSV, JSON, images, videos, audio, code files
   - Max 50MB per file, 200MB total
+  - Files uploaded as base64 in frontend, decoded to binary Buffer during database insertion
 
 - **Auto-save:**
   - Saves draft every 30 seconds to localStorage
@@ -261,7 +267,9 @@ CREATE TABLE gdpval_tasks (
 - `pending` → Waiting for worker to pick up
 - `processing` → Worker is running Claude SDK
 - `completed` → PR created successfully
-- `failed` → Error occurred
+- `failed` → Error occurred (can be retried)
+- `cancelled` → Manually cancelled by user
+- `superseded` → Replaced by newer version (task versioning)
 
 #### `gdpval_rubrics`
 ```sql
@@ -294,6 +302,63 @@ CREATE TABLE gdpval_solution_files (
   duration_formatted VARCHAR(50),
 
   created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### `gdpval_templates` (Task Templates)
+```sql
+CREATE TABLE gdpval_templates (
+  id SERIAL PRIMARY KEY,
+  template_name VARCHAR(255) NOT NULL,
+  task_metadata JSONB NOT NULL,  -- Stores full task configuration
+  file_metadata JSONB,  -- File references and metadata
+  created_by VARCHAR(255),
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### `gdpval_task_logs` (Structured Logging)
+```sql
+CREATE TABLE gdpval_task_logs (
+  id SERIAL PRIMARY KEY,
+  task_id VARCHAR(255) REFERENCES gdpval_tasks(task_id),
+  log_type VARCHAR(50),  -- info, warning, error
+  stage VARCHAR(100),  -- recovery, step_1, step_2, build, deploy
+  message TEXT,
+  server_name VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### `gdpval_servers` (Pipeline Server Management)
+```sql
+CREATE TABLE gdpval_servers (
+  id SERIAL PRIMARY KEY,
+  server_name VARCHAR(255) UNIQUE NOT NULL,
+  server_host VARCHAR(255) NOT NULL,
+  server_port INTEGER DEFAULT 22,
+  status VARCHAR(50) DEFAULT 'available',  -- available, busy, offline
+  last_health_check TIMESTAMP,
+  cpu_usage NUMERIC,
+  memory_usage NUMERIC,
+  disk_usage NUMERIC,
+  current_task_id VARCHAR(255),
+  created_at TIMESTAMP DEFAULT NOW()
+);
+```
+
+#### `gdpval_sectors` & `gdpval_occupations` (Reference Data)
+```sql
+CREATE TABLE gdpval_sectors (
+  id SERIAL PRIMARY KEY,
+  sector_name VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE gdpval_occupations (
+  id SERIAL PRIMARY KEY,
+  occupation_name VARCHAR(255) UNIQUE NOT NULL,
+  sector_id INTEGER REFERENCES gdpval_sectors(id)
 );
 ```
 
@@ -456,6 +521,177 @@ app.get('/gdpval-queue', requireAuth, (req, res) => {
 
 ---
 
+### 4. Task Versioning System
+
+**Purpose:** Create new versions of tasks while maintaining history
+
+**Database Fields:**
+- `supersedes` (VARCHAR) - Task ID being replaced
+- `superseded_by` (VARCHAR) - Newer version's task ID
+
+**Workflow:**
+1. User edits existing task in frontend
+2. Frontend generates new task ID with version suffix (e.g., `task-name-v2`)
+3. On submit, includes `supersedes: original-task-id` in payload
+4. Backend marks original task as `status='superseded'`
+5. Sets `superseded_by` field on original task
+
+**Authorization Rules:**
+- Users can only create versions of their own tasks (`created_by` check)
+- Cannot edit or supersede tasks owned by other users
+- Version chains tracked via `/api/gdpval/tasks/:taskId/versions`
+
+**Code Reference:** `/routes/gdpvalTask.js:183-204`
+
+---
+
+### 5. Server Management & Health Monitoring
+
+**Server Infrastructure:**
+
+The system uses a **hybrid SSH orchestration architecture**:
+- Admin server runs Node.js queue processor (`gdpvalTaskService.js`)
+- Queue processor checks for pending tasks every **30 seconds**
+- Admin server manages SSH connections to remote pipeline servers
+- Pipeline servers run Python workers (`gdpval_worker.py`)
+- Admin server streams logs via SSH and tmux sessions
+
+**Server Status States:**
+- `available` - Ready to process tasks
+- `busy` - Currently processing a task
+- `offline` - Not responding to health checks
+
+**Health Checks (every request):**
+```javascript
+// services/gdpvalTaskService.js:75-91
+async function checkServerHealth(server) {
+  const ssh = await createSSHConnection(server);
+  const metrics = await ssh.exec('top -bn1 | grep "Cpu(s)"');  // CPU usage
+  const memory = await ssh.exec('free -m');  // Memory usage
+  const disk = await ssh.exec('df -h /');  // Disk usage
+
+  await db.updateServerMetrics(server.id, {
+    cpu_usage: parseCPU(metrics),
+    memory_usage: parseMemory(memory),
+    disk_usage: parseDisk(disk),
+    last_health_check: new Date()
+  });
+}
+```
+
+**Task Assignment:**
+1. Queue processor finds oldest pending task
+2. Checks for available server (status='available')
+3. Marks server as 'busy' and assigns task
+4. Creates SSH connection to pipeline server
+5. Launches tmux session: `tmux new -d -s gdpval-{task_id}`
+6. Streams logs back to admin database
+
+**Server Management API:**
+- `GET /api/gdpval/servers` - List all servers with metrics
+- `POST /api/gdpval/servers` - Register new pipeline server (admin only)
+- `PUT /api/gdpval/servers/:id/status` - Manual enable/disable
+- `DELETE /api/gdpval/servers/:id` - Remove server (admin only)
+
+**Code Reference:**
+- Service: `/services/gdpvalTaskService.js:66-91`
+- Routes: `/routes/gdpvalTask.js:968-1050`
+- Database: `/db/index.js:540-555`
+
+---
+
+### 6. Stuck Task Recovery System
+
+**Purpose:** Automatically recover tasks that timeout or hang
+
+**Recovery Logic:**
+```javascript
+// Runs every 5 minutes
+async function recoverStuckTasks() {
+  const TIMEOUT_MINUTES = 60;
+
+  // Find tasks processing for >60 minutes
+  const stuckTasks = await db.query(`
+    SELECT task_id, server_name FROM gdpval_tasks
+    WHERE status = 'processing'
+    AND updated_at < NOW() - INTERVAL '${TIMEOUT_MINUTES} minutes'
+  `);
+
+  for (const task of stuckTasks) {
+    // Mark task as failed
+    await db.updateTaskStatus(task.task_id, 'failed');
+
+    // Free the orphaned server
+    await db.updateServerStatus(task.server_name, 'available');
+
+    // Log recovery event
+    await db.insertTaskLog({
+      task_id: task.task_id,
+      log_type: 'warning',
+      stage: 'recovery',
+      message: `Task stuck for >${TIMEOUT_MINUTES}min, marked as failed`
+    });
+  }
+}
+```
+
+**Timeout Settings:**
+- Queue processor check interval: **5 minutes**
+- Task timeout threshold: **60 minutes**
+- Claude SDK timeout: **45 minutes** (2700 seconds)
+
+**Code Reference:** `/services/gdpvalTaskService.js` (recovery function)
+
+---
+
+### 7. Complete API Reference
+
+**Task Management:**
+- `POST /api/gdpval/tasks` - Create new task
+- `GET /api/gdpval/tasks` - List queue (paginated, filterable)
+- `GET /api/gdpval/tasks/mine` - Current user's tasks only
+- `GET /api/gdpval/tasks/:taskId` - Get task metadata
+- `GET /api/gdpval/tasks/:taskId/full` - Get task with all files
+- `GET /api/gdpval/tasks/:taskId/files` - Get file list only
+- `GET /api/gdpval/tasks/:taskId/versions` - Version chain history
+- `PUT /api/gdpval/tasks/:taskId` - Update pending task (owner only)
+- `DELETE /api/gdpval/tasks/:taskId` - Delete task (owner only)
+- `POST /api/gdpval/tasks/:taskId/retry` - Retry failed task
+- `POST /api/gdpval/tasks/:taskId/cancel` - Cancel running task
+- `POST /api/gdpval/tasks/:taskId/process` - Manually trigger processing
+
+**Bulk Operations:**
+- `POST /api/gdpval/tasks/bulk-retry` - Retry multiple failed tasks
+- `POST /api/gdpval/tasks/bulk-delete` - Delete multiple tasks
+- `POST /api/gdpval/tasks/reorder` - Reorder task priorities
+
+**Monitoring:**
+- `GET /api/gdpval/tasks/:taskId/status` - Real-time status polling
+- `GET /api/gdpval/tasks/:taskId/logs` - Structured logs
+- `GET /api/gdpval/analytics` - Task statistics and metrics
+
+**Server Management:**
+- `GET /api/gdpval/servers` - List servers with health metrics
+- `POST /api/gdpval/servers` - Register new server (admin only)
+- `PUT /api/gdpval/servers/:id/status` - Enable/disable server
+- `DELETE /api/gdpval/servers/:id` - Remove server (admin only)
+
+**Templates:**
+- `GET /api/gdpval/templates` - List user's templates
+- `POST /api/gdpval/templates` - Save new template
+- `GET /api/gdpval/templates/:id` - Load template
+- `PUT /api/gdpval/templates/:id` - Update template
+- `DELETE /api/gdpval/templates/:id` - Delete template
+
+**Reference Data:**
+- `GET /api/gdpval/sectors` - List all sectors
+- `GET /api/gdpval/occupations` - List occupations by sector
+- `POST /api/gdpval/sectors/seed` - Seed initial data (admin only)
+
+**Code Reference:** `/routes/gdpvalTask.js` (complete file, 1300+ lines)
+
+---
+
 ## Pipeline & Worker
 
 ### 1. Worker Script (`gdpval_worker.py`)
@@ -504,8 +740,9 @@ async def process_task(task_id: str) -> bool:
     #   docker-compose.yaml
     #   data/
     #     <reference files>
-    #   tests/solution/
+    #   solution_files/  (extracted from PostgreSQL BYTEA)
     #     <solution files>
+    # Note: solution_files/ may be moved to tests/solution/ during build
 
     # Step 4: Run Claude SDK to generate test harness
     build_success, metadata = await run_gdpval_build(task_id)
