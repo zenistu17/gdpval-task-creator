@@ -5,7 +5,7 @@
 **This document contains EXACT specifications that must be followed.**
 Missing any detail here will cause runtime failures.
 
-**Last Major Update**: January 4, 2026 - Added DynamoDB authentication, user management, role-based permissions
+**Last Major Update**: January 4, 2026 - Added payment info collection system with Wise/Crypto/SWIFT support
 
 ---
 
@@ -808,6 +808,679 @@ Attributes:
 
 ---
 
+## Payment Info Collection System
+
+**Added**: January 4, 2026
+**Purpose**: Collect contributor payment information before task submission
+
+### Overview
+
+All contributors must provide payment information before submitting tasks. This enables automated payments for completed work. The system supports three payment methods:
+- **Wise**: International money transfers via Wise ID
+- **Crypto**: USDC payments on Solana or Ethereum (ERC-20)
+- **SWIFT**: Direct bank transfers via SWIFT/IBAN
+
+### Architecture Flow
+
+```
+User fills task form
+       ↓
+Clicks "Generate & Download"
+       ↓
+Check payment info exists (GET /api/service/contributor-payment-info/:username)
+       ↓
+    No info? → Show payment modal (closable, preserves form data)
+       ↓          ↓
+    Has info?  User fills payment info → POST /api/service/contributor-payment-info/:username
+       ↓          ↓
+       ↓       Success → Close modal → Auto-retry task submission
+       ↓
+Submit task normally
+```
+
+### Frontend Implementation
+
+#### Payment Check Before Submission (`script.js:2716`)
+
+```javascript
+async function generateAndDownload() {
+  if (!validateForm()) return;
+
+  // Check if user has payment info before allowing task creation
+  const hasPaymentInfo = await checkPaymentInfo();
+  if (!hasPaymentInfo) {
+    showPaymentInfoModal();
+    return;  // Block task submission until payment info provided
+  }
+
+  // Continue with task creation...
+}
+
+async function checkPaymentInfo() {
+  try {
+    const userResponse = await fetch('/api/user', { credentials: 'include' });
+    if (!userResponse.ok) return false;
+
+    const userData = await userResponse.json();
+    const username = userData.user?.username;
+    if (!username) return false;
+
+    // Call admin service API to check payment info
+    const response = await fetch(
+      `https://admin.parsewave.ai/api/service/contributor-payment-info/${username}`,
+      {
+        headers: {
+          'X-Service-Key': 'dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7'
+        }
+      }
+    );
+
+    if (!response.ok) return false;
+
+    const data = await response.json();
+    return data.hasPaymentInfo === true;
+  } catch (err) {
+    console.error('Error checking payment info:', err);
+    return false;
+  }
+}
+```
+
+#### Payment Info Modal (`gdpval-task.html:441`)
+
+**Key Features**:
+- ✅ Closable (X button + backdrop click)
+- ✅ Preserves task form data when closed
+- ✅ Shows helpful toast: "You can submit your task after setting up payment info"
+- ✅ Auto-retries task submission after successful save
+
+**HTML Structure**:
+```html
+<div class="modal" id="paymentInfoModal">
+  <div class="modal-backdrop" id="paymentModalBackdrop"></div>
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Payment Information Required</h2>
+      <button type="button" class="close-btn" id="closePaymentModal">&times;</button>
+    </div>
+
+    <!-- Email (required for all methods) -->
+    <input type="email" id="standalonePaymentEmail" required>
+
+    <!-- Payment method selector -->
+    <select id="standalonePaymentMethod" required>
+      <option value="">Select payment method...</option>
+      <option value="wise">Wise</option>
+      <option value="crypto">Crypto</option>
+      <option value="swift">SWIFT</option>
+    </select>
+
+    <!-- Wise Fields (shown when method=wise) -->
+    <div id="standaloneWiseFields" style="display: none;">
+      <input type="text" id="standaloneWiseId" placeholder="@username or email">
+    </div>
+
+    <!-- Crypto Fields (shown when method=crypto) -->
+    <div id="standaloneCryptoFields" style="display: none;">
+      <select id="standaloneCryptoNetwork">
+        <option value="erc20">Ethereum (ERC-20)</option>
+        <option value="solana">Solana</option>
+      </select>
+      <input type="text" id="standaloneCryptoAddress" placeholder="0x... or base58 address">
+    </div>
+
+    <!-- SWIFT Fields (shown when method=swift) -->
+    <div id="standaloneSwiftFields" style="display: none;">
+      <input type="text" id="standaloneSwiftAccountHolder" placeholder="John Doe">
+      <input type="text" id="standaloneSwiftBic" placeholder="DEUTDEFF">
+      <input type="text" id="standaloneSwiftAccountNumber" placeholder="DE89370400440532013000">
+      <input type="text" id="standaloneSwiftCountry" placeholder="DE">
+      <input type="text" id="standaloneSwiftCity" placeholder="Berlin">
+      <input type="text" id="standaloneSwiftAddress" placeholder="123 Main St">
+      <input type="text" id="standaloneSwiftPostCode" placeholder="10115">
+      <input type="text" id="standaloneSwiftState" placeholder="Berlin">
+    </div>
+
+    <button id="standaloneSubmitPayment">Submit Payment Info</button>
+  </div>
+</div>
+```
+
+#### Payment Method Validation (`script.js:2814`)
+
+```javascript
+// Wise validation
+if (paymentMethod === 'wise') {
+  const wiseId = document.getElementById('standaloneWiseId').value.trim();
+  if (!wiseId) {
+    showToast('Please enter Wise ID', 'error');
+    return;
+  }
+  paymentInfo.wiseId = wiseId;
+}
+
+// Crypto validation
+else if (paymentMethod === 'crypto') {
+  const cryptoAddress = document.getElementById('standaloneCryptoAddress').value.trim();
+  if (!cryptoAddress) {
+    showToast('Please enter wallet address', 'error');
+    return;
+  }
+  paymentInfo.crypto_address = cryptoAddress;
+  paymentInfo.crypto_network = cryptoNetwork;  // erc20 or solana
+}
+
+// SWIFT validation
+else if (paymentMethod === 'swift') {
+  const swiftAccountHolder = document.getElementById('standaloneSwiftAccountHolder').value.trim();
+  const swiftBic = document.getElementById('standaloneSwiftBic').value.trim();
+  const swiftAccountNumber = document.getElementById('standaloneSwiftAccountNumber').value.trim();
+
+  if (!swiftAccountHolder || !swiftBic || !swiftAccountNumber) {
+    showToast('Please fill in required SWIFT fields', 'error');
+    return;
+  }
+
+  // Include all SWIFT fields
+  paymentInfo.swift_account_holder = swiftAccountHolder;
+  paymentInfo.swift_bic = swiftBic;
+  paymentInfo.swift_account_number = swiftAccountNumber;
+  paymentInfo.swift_country = swiftCountry;
+  paymentInfo.swift_city = swiftCity;
+  paymentInfo.swift_address = swiftAddress;
+  paymentInfo.swift_post_code = swiftPostCode;
+  paymentInfo.swift_state = swiftState;
+}
+```
+
+#### Auto-Retry After Save (`script.js:2876`)
+
+```javascript
+// After successful payment info submission
+showToast('Payment info saved successfully', 'success');
+
+// Close modal
+const modal = document.getElementById('paymentInfoModal');
+modal.classList.remove('active');
+
+// Retry task submission now that payment info is set
+setTimeout(() => {
+  generateAndDownload();  // Retries task creation
+}, 500);
+```
+
+### Backend Implementation (Admin Repo)
+
+**Repository**: https://github.com/Parsewave-internal/admin
+**Branch**: `feature/wise-email-update`
+
+#### Service API Endpoints (`routes/serviceApi.js:279`)
+
+These endpoints use **service key authentication** (X-Service-Key header) instead of OAuth, enabling service-to-service communication.
+
+##### GET /api/service/contributor-payment-info/:username
+
+**Purpose**: Check if contributor has payment info
+**Auth**: Service key required
+**Response**:
+```json
+{
+  "success": true,
+  "username": "johndoe",
+  "paymentInfo": {
+    "github_username": "johndoe",
+    "email": "john@example.com",
+    "payment_method": "wise",
+    "wise_id": "@johndoe"
+  },
+  "hasPaymentInfo": true
+}
+```
+
+**Implementation**:
+```javascript
+app.get('/api/service/contributor-payment-info/:username', requireServiceKey, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const paymentInfo = await db.getContributorPaymentInfoByGithub(username);
+
+    res.json({
+      success: true,
+      username,
+      paymentInfo,
+      hasPaymentInfo: !!paymentInfo
+    });
+  } catch (err) {
+    log('Error getting contributor payment info:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+```
+
+##### POST /api/service/contributor-payment-info/:username
+
+**Purpose**: Save/update contributor payment info
+**Auth**: Service key required
+**Request Body**:
+```json
+{
+  "email": "john@example.com",
+  "paymentMethod": "wise",
+  "wiseId": "@johndoe",
+
+  // OR for crypto:
+  "crypto_address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb",
+  "crypto_network": "erc20",
+
+  // OR for SWIFT:
+  "swift_account_holder": "John Doe",
+  "swift_bic": "DEUTDEFF",
+  "swift_account_number": "DE89370400440532013000",
+  "swift_country": "DE",
+  "swift_city": "Berlin",
+  "swift_address": "123 Main St",
+  "swift_post_code": "10115",
+  "swift_state": "Berlin"
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "paymentInfo": {
+    "github_username": "johndoe",
+    "email": "john@example.com",
+    "payment_method": "wise",
+    "wise_id": "@johndoe"
+  }
+}
+```
+
+**Implementation**:
+```javascript
+app.post('/api/service/contributor-payment-info/:username', requireServiceKey, async (req, res) => {
+  try {
+    const { username } = req.params;
+    const {
+      email, wiseId, paymentMethod,
+      swift_account_holder, swift_bic, swift_account_number, swift_country,
+      swift_city, swift_address, swift_post_code, swift_state,
+      crypto_address, crypto_network
+    } = req.body;
+
+    const result = await db.upsertContributorPaymentInfoByGithub({
+      githubUsername: username,
+      email,
+      wiseId,
+      paymentMethod,
+      swiftAccountHolder: swift_account_holder,
+      swiftBic: swift_bic,
+      swiftAccountNumber: swift_account_number,
+      swiftCountry: swift_country,
+      swiftCity: swift_city,
+      swiftAddress: swift_address,
+      swiftPostCode: swift_post_code,
+      swiftState: swift_state,
+      cryptoAddress: crypto_address,
+      cryptoNetwork: crypto_network
+    });
+
+    log(`Payment info updated for ${username} by ${req.serviceName}`);
+    res.json({ success: true, paymentInfo: result });
+  } catch (err) {
+    log('Error updating contributor payment info:', err.message);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+```
+
+#### Service Key Middleware (`routes/serviceApi.js:14`)
+
+```javascript
+const requireServiceKey = (req, res, next) => {
+  const key = req.headers['x-service-key'];
+  const expectedKey = process.env.SERVICE_API_KEY;
+
+  if (!expectedKey) {
+    log('SERVICE_API_KEY not configured');
+    return res.status(500).json({ success: false, error: 'Service API not configured' });
+  }
+
+  if (!key || key !== expectedKey) {
+    log('Invalid service key attempt');
+    return res.status(401).json({ success: false, error: 'Invalid or missing service key' });
+  }
+
+  req.serviceName = req.headers['x-service-name'] || 'unknown';
+  next();
+};
+```
+
+**Environment Variable**:
+```bash
+SERVICE_API_KEY=dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7
+```
+
+### Database Schema (PostgreSQL)
+
+#### contributor_payment_info Table
+
+```sql
+CREATE TABLE contributor_payment_info (
+  id SERIAL PRIMARY KEY,
+  github_username VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255),
+
+  -- Payment method: 'wise', 'crypto', 'swift'
+  payment_method VARCHAR(50),
+
+  -- Wise payment info
+  wise_id VARCHAR(255),  -- @username or email
+
+  -- Crypto payment info
+  crypto_address VARCHAR(255),
+  crypto_network VARCHAR(50),  -- 'erc20' or 'solana'
+
+  -- SWIFT payment info
+  swift_account_holder VARCHAR(255),
+  swift_bic VARCHAR(50),
+  swift_account_number VARCHAR(255),
+  swift_country VARCHAR(10),
+  swift_city VARCHAR(255),
+  swift_address TEXT,
+  swift_post_code VARCHAR(20),
+  swift_state VARCHAR(255),
+
+  -- Metadata
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+CREATE INDEX idx_payment_info_username ON contributor_payment_info(github_username);
+```
+
+#### Database Function (`db/index.js:3136`)
+
+```javascript
+const upsertContributorPaymentInfoByGithub = async ({
+  githubUsername, email, wiseId, paymentMethod,
+  swiftAccountHolder, swiftBic, swiftAccountNumber, swiftCountry,
+  swiftCity, swiftAddress, swiftPostCode, swiftState,
+  cryptoAddress, cryptoNetwork
+}) => {
+  if (!githubUsername) throw new Error('githubUsername is required');
+
+  const existing = await getContributorPaymentInfoByGithub(githubUsername);
+
+  if (existing) {
+    // Update - use COALESCE to preserve existing values when new value is null
+    const result = await pool.query(
+      `UPDATE contributor_payment_info SET
+         email = COALESCE($2, email),
+         wise_id = COALESCE($3, wise_id),
+         payment_method = COALESCE($4, payment_method),
+         swift_account_holder = COALESCE($5, swift_account_holder),
+         swift_bic = COALESCE($6, swift_bic),
+         swift_account_number = COALESCE($7, swift_account_number),
+         swift_country = COALESCE($8, swift_country),
+         swift_city = COALESCE($9, swift_city),
+         swift_address = COALESCE($10, swift_address),
+         swift_post_code = COALESCE($11, swift_post_code),
+         swift_state = COALESCE($12, swift_state),
+         crypto_address = COALESCE($13, crypto_address),
+         crypto_network = COALESCE($14, crypto_network),
+         updated_at = NOW()
+       WHERE github_username = $1 RETURNING *`,
+      [githubUsername, email, wiseId, paymentMethod,
+       swiftAccountHolder, swiftBic, swiftAccountNumber, swiftCountry,
+       swiftCity, swiftAddress, swiftPostCode, swiftState,
+       cryptoAddress, cryptoNetwork]
+    );
+    return result.rows[0];
+  } else {
+    // Insert new
+    const result = await pool.query(
+      `INSERT INTO contributor_payment_info (
+         github_username, email, wise_id, payment_method,
+         swift_account_holder, swift_bic, swift_account_number, swift_country,
+         swift_city, swift_address, swift_post_code, swift_state,
+         crypto_address, crypto_network
+       ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+      [githubUsername, email, wiseId, paymentMethod,
+       swiftAccountHolder, swiftBic, swiftAccountNumber, swiftCountry,
+       swiftCity, swiftAddress, swiftPostCode, swiftState,
+       cryptoAddress, cryptoNetwork]
+    );
+    return result.rows[0];
+  }
+};
+```
+
+### Testing Locally
+
+#### 1. Admin Server Setup
+
+```bash
+# Clone and setup admin repo
+git clone https://github.com/Parsewave-internal/admin.git /tmp/parsewave-admin
+cd /tmp/parsewave-admin
+git checkout feature/wise-email-update
+
+# Install dependencies
+npm install
+
+# Create .env file
+cat > .env << 'EOF'
+PORT=3001
+DATABASE_URL=postgresql://user:password@localhost:5432/parsewave
+DATABASE_SSL=false
+SERVICE_API_KEY=dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7
+SESSION_SECRET=test-secret-key
+ENABLE_AI_CHECK=false
+EOF
+
+# Run database migrations
+psql -U postgres -d parsewave -f migrations/add_contributor_payment_info.sql
+
+# Start server
+node server.js
+```
+
+Server should start on http://localhost:3001
+
+#### 2. GDPVAL Frontend Setup
+
+```bash
+# Clone and setup GDPVAL repo
+git clone https://github.com/Parsewave-internal/GDPVAL.git /tmp/GDPVAL
+cd /tmp/GDPVAL
+git checkout feature/payment-info-form
+
+# Update config for local testing
+# Edit frontend/config.js:
+window.GDPVAL_CONFIG = {
+  BACKEND_API_URL: 'http://localhost:8000',
+  API_PREFIX: '/api/gdpval'
+};
+
+# Start server
+./run-server.sh server
+```
+
+Server should start on http://localhost:8000
+
+#### 3. Test Payment Info Flow
+
+**Step 1**: Open http://localhost:8000/gdpval-task.html
+
+**Step 2**: Log in with test user (username: test, password: test123)
+
+**Step 3**: Fill out task form completely
+
+**Step 4**: Click "Generate & Download"
+- Should show payment info modal
+- Modal should be closable (X button or backdrop)
+- Task form data should remain when modal closes
+
+**Step 5**: Fill payment info (choose any method):
+
+**Wise**:
+- Email: test@example.com
+- Payment Method: Wise
+- Wise ID: @testuser
+
+**Crypto**:
+- Email: test@example.com
+- Payment Method: Crypto
+- Network: Solana
+- Address: SomeBase58AddressHere123456789
+
+**SWIFT**:
+- Email: test@example.com
+- Payment Method: SWIFT
+- Account Holder: John Doe
+- BIC: DEUTDEFF
+- Account Number: DE89370400440532013000
+- (optional: country, city, address, etc.)
+
+**Step 6**: Click "Submit Payment Info"
+- Should see success toast
+- Modal should close
+- Task submission should auto-retry
+- Task should be created successfully
+
+**Step 7**: Try submitting another task
+- Should NOT show payment modal (info already saved)
+- Should submit directly
+
+#### 4. Test Service API with curl
+
+**Check payment info**:
+```bash
+curl -X GET "http://localhost:3001/api/service/contributor-payment-info/test" \
+  -H "X-Service-Key: dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7"
+```
+
+**Expected response** (if exists):
+```json
+{
+  "success": true,
+  "username": "test",
+  "paymentInfo": {
+    "github_username": "test",
+    "email": "test@example.com",
+    "payment_method": "wise",
+    "wise_id": "@testuser"
+  },
+  "hasPaymentInfo": true
+}
+```
+
+**Create payment info**:
+```bash
+curl -X POST "http://localhost:3001/api/service/contributor-payment-info/test" \
+  -H "Content-Type: application/json" \
+  -H "X-Service-Key: dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7" \
+  -d '{
+    "email": "test@example.com",
+    "paymentMethod": "wise",
+    "wiseId": "@testuser"
+  }'
+```
+
+**Expected response**:
+```json
+{
+  "success": true,
+  "paymentInfo": {
+    "github_username": "test",
+    "email": "test@example.com",
+    "payment_method": "wise",
+    "wise_id": "@testuser"
+  }
+}
+```
+
+#### 5. Verify Database
+
+```bash
+psql -U postgres -d parsewave -c "SELECT * FROM contributor_payment_info WHERE github_username = 'test';"
+```
+
+Should show the payment info record with all fields.
+
+### Common Issues
+
+#### 1. Service API Not Found (404)
+
+**Symptom**: Frontend gets 404 when checking payment info
+
+**Cause**: Admin server not on `feature/wise-email-update` branch
+
+**Fix**:
+```bash
+cd /tmp/parsewave-admin
+git checkout feature/wise-email-update
+git pull
+node server.js
+```
+
+#### 2. Service Key Authentication Failed (401)
+
+**Symptom**: "Invalid or missing service key" error
+
+**Cause**: Missing or incorrect SERVICE_API_KEY in admin .env
+
+**Fix**:
+```bash
+echo "SERVICE_API_KEY=dd4f22fe-1bab-4bda-8a2e-4586e2b4afc7" >> .env
+```
+
+#### 3. Email Field Not Saved
+
+**Symptom**: Email is null in database even though provided
+
+**Cause**: Old version of db/index.js without email field fix
+
+**Fix**:
+```bash
+git pull origin feature/wise-email-update
+# Restart server
+```
+
+#### 4. Payment Modal Not Showing
+
+**Symptom**: Task submits without payment info check
+
+**Cause**: GDPVAL not on `feature/payment-info-form` branch
+
+**Fix**:
+```bash
+cd /tmp/GDPVAL
+git checkout feature/payment-info-form
+git pull
+./run-server.sh server
+```
+
+#### 5. CORS Errors
+
+**Symptom**: Frontend can't call admin API due to CORS
+
+**Cause**: Admin server not configured for CORS
+
+**Fix**: Add to admin server.js:
+```javascript
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:8000');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, X-Service-Key');
+  next();
+});
+```
+
+---
+
 ## Common Gotchas & Pitfalls
 
 ### 1. Login Endpoint Content-Type Mismatch
@@ -1105,6 +1778,6 @@ BACKEND_API_URL: window.location.hostname === 'localhost'
 
 ---
 
-**Last Updated**: January 4, 2026
+**Last Updated**: January 4, 2026 (Added Payment Info Collection System)
 **Maintainer**: Development Team
 **Repository**: https://github.com/Parsewave-internal/GDPVAL
