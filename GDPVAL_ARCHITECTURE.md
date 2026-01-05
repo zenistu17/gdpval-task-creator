@@ -5,7 +5,7 @@
 **This document contains EXACT specifications that must be followed.**
 Missing any detail here will cause runtime failures.
 
-**Last Major Update**: January 4, 2026 - Added payment info collection system with Wise/Crypto/SWIFT support
+**Last Major Update**: January 5, 2026 - Added Templates system, Reviewer Dashboard, Email verification/password reset, and critical routing fixes
 
 ---
 
@@ -1478,6 +1478,561 @@ app.use((req, res, next) => {
   next();
 });
 ```
+
+---
+
+## Templates System
+
+**Added**: January 5, 2026
+**Purpose**: Allow users to save and reuse task configurations as templates
+
+### Overview
+
+Contributors can save their task configurations (instruction, rubrics, sources, files) as templates for reuse. This speeds up task creation for similar tasks and ensures consistency.
+
+### Database Schema
+
+#### GDPValTemplates Table
+
+```
+Primary Key: template_id (String)
+Attributes:
+  - template_id: "tmpl_<8 random chars>" (e.g., "tmpl_a1b2c3d4")
+  - user_id: User who created the template
+  - name: Template name (user-defined)
+  - description: Optional description
+  - sector: BLS sector
+  - occupation: BLS occupation
+  - instruction: Task instruction text
+  - rubrics: JSON array of rubric objects
+  - sources: JSON array of source objects
+  - solutionFiles: JSON array with base64 encoded files
+  - dataFiles: JSON array with base64 encoded files
+  - created_at: ISO timestamp
+  - updated_at: ISO timestamp
+
+Global Secondary Index: UserIdIndex
+  - Hash Key: user_id
+  - Range Key: created_at
+  - Projection: ALL
+  - Purpose: Query user's templates sorted by creation date
+```
+
+**Table Creation**: Run `python backend/create_auth_tables.py` to create the table.
+
+### Frontend Implementation
+
+#### Save Template (`script.js:653`)
+
+```javascript
+async function saveAsTemplate() {
+  const name = prompt('Enter template name:');
+  if (!name) return;
+
+  // Convert files to base64 for storage
+  const solutionFilesData = await Promise.all(
+    state.solutionFiles.map(async (file) => {
+      const base64Content = await fileToBase64(file);
+      return {
+        name: file.name,
+        path: file.webkitRelativePath || file.name,
+        content: base64Content,
+        mime_type: file.type,
+        size: file.size
+      };
+    })
+  );
+
+  const dataFilesData = await Promise.all(
+    state.referenceFiles.map(async (file) => {
+      const base64Content = await fileToBase64(file);
+      return {
+        name: file.name,
+        path: file.webkitRelativePath || file.name,
+        content: base64Content,
+        mime_type: file.type,
+        size: file.size
+      };
+    })
+  );
+
+  const template = {
+    name,
+    description: '',
+    sector: document.getElementById('sector').value,
+    occupation: document.getElementById('occupation').value,
+    instruction: document.getElementById('instruction').value,
+    rubrics: getRubricData(),
+    sources: getSourcesData(),
+    solutionFiles: solutionFilesData,
+    dataFiles: dataFilesData
+  };
+
+  const response = await fetch(apiUrl('/templates'), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    credentials: 'include',
+    body: JSON.stringify(template)
+  });
+
+  if (response.ok) {
+    showToast(`Template "${name}" saved`, 'success');
+    initializeTemplates();  // Reload templates list
+  }
+}
+```
+
+#### Load Templates (`script.js:444`)
+
+```javascript
+async function initializeTemplates() {
+  const response = await fetch(apiUrl('/templates'), {
+    credentials: 'include'
+  });
+
+  if (response.ok) {
+    const data = await response.json();
+    state.templates = data.templates || [];
+
+    // Populate dropdown
+    templateSelect.innerHTML = '<option value="">Select a template...</option>';
+    state.templates.forEach(t => {
+      const option = document.createElement('option');
+      option.value = t.id;  // Backend maps template_id → id
+      option.textContent = t.name;
+      templateSelect.appendChild(option);
+    });
+  }
+}
+```
+
+### Backend API
+
+#### GET /api/gdpval/templates
+
+**Auth**: Required (returns user's templates only)
+
+**Response**:
+```json
+{
+  "success": true,
+  "templates": [
+    {
+      "id": "tmpl_a1b2c3d4",  // Mapped from template_id
+      "template_id": "tmpl_a1b2c3d4",
+      "user_id": "usr_test_001",
+      "name": "Financial Analysis Template",
+      "sector": "Finance and Insurance",
+      "occupation": "Financial Analysts",
+      "instruction": "...",
+      "rubrics": [...],
+      "sources": [...],
+      "solutionFiles": [...],
+      "dataFiles": [...],
+      "created_at": "2026-01-05T00:00:00Z"
+    }
+  ]
+}
+```
+
+**Backend** (`api_server.py:1785`):
+```python
+@app.get("/api/gdpval/templates")
+async def get_templates(user_id: str = Depends(require_auth)):
+    """Get saved templates for current user"""
+    try:
+        import boto3
+        dynamodb = boto3.resource('dynamodb', region_name=os.environ.get("AWS_REGION", "us-east-1"))
+        table = dynamodb.Table(os.environ.get("GDPVAL_TEMPLATES_TABLE", "GDPValTemplates"))
+
+        # Query templates for this user
+        response = table.query(
+            IndexName='UserIdIndex',
+            KeyConditionExpression='user_id = :uid',
+            ExpressionAttributeValues={':uid': user_id}
+        )
+
+        # Map template_id to id for frontend compatibility
+        templates = [
+            {**item, 'id': item['template_id']}
+            for item in response.get('Items', [])
+        ]
+        return {"success": True, "templates": templates}
+    except Exception as e:
+        logger.error(f"Failed to get templates: {e}")
+        return {"success": True, "templates": []}
+```
+
+#### POST /api/gdpval/templates
+
+**Auth**: Required
+
+**Request**:
+```json
+{
+  "name": "Financial Analysis Template",
+  "description": "Template for financial reports",
+  "sector": "Finance and Insurance",
+  "occupation": "Financial Analysts",
+  "instruction": "Analyze the quarterly report...",
+  "rubrics": [...],
+  "sources": [...],
+  "solutionFiles": [...],
+  "dataFiles": [...]
+}
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "template_id": "tmpl_a1b2c3d4",
+  "message": "Template 'Financial Analysis Template' saved successfully"
+}
+```
+
+**Backend** (`api_server.py:1808`):
+```python
+@app.post("/api/gdpval/templates")
+async def create_template(
+    template: TemplateRequest,
+    user_id: str = Depends(require_auth)
+):
+    """Save a template"""
+    try:
+        import boto3
+        from datetime import datetime, timezone
+
+        dynamodb = boto3.resource('dynamodb', region_name=os.environ.get("AWS_REGION", "us-east-1"))
+        table = dynamodb.Table(os.environ.get("GDPVAL_TEMPLATES_TABLE", "GDPValTemplates"))
+
+        template_id = f"tmpl_{secrets.token_urlsafe(8)}"
+
+        table.put_item(Item={
+            'template_id': template_id,
+            'user_id': user_id,
+            'name': template.name,
+            'description': template.description or '',
+            'sector': template.sector or '',
+            'occupation': template.occupation or '',
+            'instruction': template.instruction,
+            'rubrics': template.rubrics,
+            'sources': template.sources,
+            'solutionFiles': template.solutionFiles,
+            'dataFiles': template.dataFiles,
+            'created_at': datetime.now(timezone.utc).isoformat(),
+            'updated_at': datetime.now(timezone.utc).isoformat()
+        })
+
+        return {
+            "success": True,
+            "template_id": template_id,
+            "message": f"Template '{template.name}' saved successfully"
+        }
+    except Exception as e:
+        logger.exception(f"Failed to save template: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to save template: {str(e)}")
+```
+
+#### DELETE /api/gdpval/templates/{template_id}
+
+**Auth**: Required (can only delete own templates)
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Template deleted successfully"
+}
+```
+
+### Validation
+
+Templates are validated during save:
+- Instruction word count must be ≤ 600 words (excluding rubric)
+- Total rubric points: 20-40
+- Rubric categories: 3-6
+- Total rubric word count: ≤ 200 words
+
+**Backend** (`validators.py:94`):
+```python
+def validate_instruction_word_count(
+    instruction_md: str,
+    max_words: int = 600
+) -> ValidationResult:
+    """Validate that instruction (excluding rubric) has ≤ max_words"""
+    result = ValidationResult(valid=True)
+
+    instruction_only = extract_instruction_without_rubric(instruction_md)
+    word_count = count_words(instruction_only)
+
+    if word_count > max_words:  # > not >=, allows exactly 600
+        result.add_error(
+            "instruction",
+            f"Instruction has {word_count} words, must be {max_words} or less"
+        )
+
+    return result
+```
+
+---
+
+## Reviewer Dashboard
+
+**Added**: January 5, 2026
+**Purpose**: Allow devs/admins to review and manage submitted tasks
+
+### Overview
+
+The reviewer dashboard provides a central interface for reviewing tasks, checking GitHub PR status, and managing task queue.
+
+### Frontend (`gdpval-reviewer.html`)
+
+**URL**: `https://gdpval.parsewave.ai/gdpval-reviewer`
+**Auth**: Dev/admin only
+
+**Features**:
+- View all tasks in queue
+- Filter by status (pending, processing, completed, failed)
+- See GitHub PR status with live updates
+- Approve/reject tasks
+- View task details inline
+- GitHub API rate limiting (max 10 concurrent requests)
+
+#### GitHub PR Status Integration (`reviewer-script.js:185`)
+
+```javascript
+async function enrichTasksWithPRStatus() {
+  const tasksWithPRs = tasks.filter(t => t.pr_number);
+
+  // Fetch PR data in batches to avoid rate limiting (max 10 concurrent)
+  const BATCH_SIZE = 10;
+  const results = [];
+
+  for (let i = 0; i < tasksWithPRs.length; i += BATCH_SIZE) {
+    const batch = tasksWithPRs.slice(i, i + BATCH_SIZE);
+    const batchPromises = batch.map(task =>
+      fetchGitHubPR(task.pr_number).then(prData => ({ task, prData }))
+    );
+    const batchResults = await Promise.all(batchPromises);
+    results.push(...batchResults);
+  }
+
+  // Update tasks with PR status
+  results.forEach(({ task, prData }) => {
+    task.pr_status = prData.state;  // open, closed, merged
+    task.pr_mergeable = prData.mergeable;
+    task.pr_checks_status = prData.checks_status;
+  });
+}
+```
+
+### Backend API
+
+#### GET /api/gdpval/reviewer/tasks
+
+**Auth**: Dev/admin only
+
+**Query Parameters**:
+- `status`: Filter by task status
+- `limit`: Max results (default 200)
+- `offset`: Pagination offset
+
+**Response**:
+```json
+{
+  "tasks": [
+    {
+      "task_id": "abc123",
+      "task_name": "Financial Analysis",
+      "status": "pending",
+      "pr_url": "https://github.com/org/repo/pull/123",
+      "pr_number": 123,
+      "created_by": "usr_test_001",
+      "created_at": "2026-01-05T00:00:00Z"
+    }
+  ],
+  "total": 42
+}
+```
+
+**Backend** (`api_server.py:1265`):
+```python
+@app.get("/api/gdpval/reviewer/tasks")
+async def get_reviewer_tasks(
+    user_id: str = Depends(require_dev_role),  # Dev/admin only
+    status: str | None = None,
+    limit: int = 200,
+    offset: int = 0
+):
+    """Get tasks for review"""
+    import boto3
+    dynamodb = boto3.resource('dynamodb', region_name=os.environ.get("AWS_REGION", "us-east-1"))
+    table = dynamodb.Table(os.environ.get("GDPVAL_TASKS_TABLE", "GDPValTasks"))
+
+    # Query all tasks (or filter by status)
+    if status:
+        response = table.query(
+            IndexName='StatusIndex',
+            KeyConditionExpression='status = :status',
+            ExpressionAttributeValues={':status': status}
+        )
+    else:
+        response = table.scan()
+
+    tasks = response.get('Items', [])
+    return {
+        "tasks": tasks[offset:offset+limit],
+        "total": len(tasks)
+    }
+```
+
+---
+
+## Email Verification & Password Reset
+
+**Added**: January 5, 2026
+**Purpose**: Enable secure account recovery and email verification
+
+### Database Schema
+
+#### GDPValTokens Table
+
+```
+Primary Key: token (String)
+Attributes:
+  - token: Random URL-safe token
+  - user_id: User this token belongs to
+  - token_type: "email_verification" | "password_reset"
+  - created_at: ISO timestamp
+  - expires_at: ISO timestamp
+  - ttl: Unix timestamp (DynamoDB TTL for auto-cleanup)
+
+TTL: Enabled on 'ttl' attribute for automatic token expiration
+```
+
+**Table Creation**: Run `python backend/create_auth_tables.py`
+
+### Email Verification Flow
+
+1. User registers → Backend creates email verification token
+2. Backend sends email with verification link
+3. User clicks link → `/verify-email?token=xyz`
+4. Backend validates token → Marks email as verified
+5. User can now log in
+
+### Password Reset Flow
+
+1. User clicks "Forgot Password" → Enters email
+2. Backend creates password reset token
+3. Backend sends email with reset link
+4. User clicks link → `/reset-password?token=xyz`
+5. User enters new password
+6. Backend validates token → Updates password
+7. User can log in with new password
+
+### SMTP Configuration
+
+**Required Environment Variables**:
+```bash
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASSWORD=your-app-password  # Gmail App Password
+SMTP_FROM_NAME=GDPVAL
+APP_BASE_URL=https://gdpval.parsewave.ai
+```
+
+**Backend** (`email_service.py`):
+```python
+def send_verification_email(email: str, token: str):
+    """Send email verification link"""
+    verification_url = f"{APP_BASE_URL}/verify-email?token={token}"
+
+    send_email(
+        to_email=email,
+        subject="Verify your GDPVal account",
+        body=f"Click to verify: {verification_url}"
+    )
+
+def send_password_reset_email(email: str, token: str):
+    """Send password reset link"""
+    reset_url = f"{APP_BASE_URL}/reset-password?token={token}"
+
+    send_email(
+        to_email=email,
+        subject="Reset your GDPVal password",
+        body=f"Click to reset: {reset_url}"
+    )
+```
+
+---
+
+## Critical Routing Fix (MUST READ)
+
+**Added**: January 5, 2026
+**Issue**: All pages were loading task creator instead of their respective pages
+
+### Problem
+
+The StaticFiles mount at `/gdpval` was intercepting ALL requests to `/gdpval-*` paths BEFORE they could reach the route handlers:
+
+```python
+# ❌ WRONG - Mounted BEFORE route handlers
+app.mount("/gdpval", StaticFiles(directory=_frontend_dir / "gdpval"), name="gdpval-static")
+
+# These routes were NEVER reached:
+@app.get("/gdpval-queue")      # Intercepted!
+@app.get("/gdpval-reviewer")   # Intercepted!
+@app.get("/gdpval-users")      # Intercepted!
+```
+
+### Solution
+
+Changed StaticFiles mount path from `/gdpval` to `/static`:
+
+```python
+# ✅ CORRECT - Different prefix
+app.mount("/static", StaticFiles(directory=_frontend_dir / "gdpval"), name="gdpval-static")
+
+# Now these routes work:
+@app.get("/gdpval-queue")      # ✅ Works
+@app.get("/gdpval-reviewer")   # ✅ Works
+@app.get("/gdpval-users")      # ✅ Works
+```
+
+### Frontend Updates
+
+All HTML files updated to reference `/static/` instead of `/gdpval/`:
+
+```html
+<!-- Before -->
+<link rel="stylesheet" href="/gdpval/style.css">
+<script src="/gdpval/script.js"></script>
+
+<!-- After -->
+<link rel="stylesheet" href="/static/style.css">
+<script src="/static/script.js"></script>
+```
+
+**Files Updated**:
+- `gdpval-task.html`
+- `gdpval-queue.html`
+- `gdpval-reviewer.html`
+- `gdpval-users.html`
+- `gdpval-login.html`
+- `verify-email.html`
+- `reset-password.html`
+
+### Why This Matters
+
+FastAPI StaticFiles creates a **catch-all route** that matches ANY path with that prefix. When registered early in the file, it takes priority over explicitly defined route handlers. This is a **critical** gotcha that will break all page routing.
+
+**Rule**: StaticFiles mounts should either:
+1. Come AFTER all route handlers (end of file), OR
+2. Use a prefix that doesn't conflict with routes (like `/static` or `/assets`)
 
 ---
 
