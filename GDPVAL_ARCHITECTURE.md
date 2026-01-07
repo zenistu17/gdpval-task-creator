@@ -1,11 +1,11 @@
-# GDPVal Complete System Architecture (Updated Jan 2026)
+# GDPVal Complete System Architecture (Updated Jan 7, 2026)
 
 ## ⚠️ CRITICAL: READ THIS FIRST
 
 **This document contains EXACT specifications that must be followed.**
 Missing any detail here will cause runtime failures.
 
-**Last Major Update**: January 5, 2026 - Added Templates system, Reviewer Dashboard, Email verification/password reset, and critical routing fixes
+**Last Major Update**: January 7, 2026 - Updated validation rules (analytic rubric), fixed file naming, added My Tasks page, pipeline/terminal_bench docs
 
 ---
 
@@ -124,12 +124,20 @@ User → GDPVAL Frontend (gdpval.parsewave.ai)
 https://github.com/Parsewave-internal/GDPVAL
 ├── backend/
 │   ├── api_server.py              ← Main FastAPI app (AUTH + TASKS)
-│   └── create_auth_tables.py      ← DynamoDB setup script
+│   ├── create_auth_tables.py      ← DynamoDB setup script
+│   ├── add_user_id_gsi.py         ← Add GSI for user_id lookups
+│   ├── email_service.py           ← Email verification/reset service
+│   └── validators.py              ← Task validation logic
 │
 ├── frontend/
 │   ├── gdpval-task.html           ← Task creator (ALL users)
 │   ├── gdpval-queue.html          ← Queue viewer (DEV/ADMIN only)
+│   ├── gdpval-review.html         ← Reviewer dashboard (DEV/ADMIN only)
+│   ├── gdpval-my-tasks.html       ← User's own tasks (ALL users)
 │   ├── gdpval-users.html          ← User management (DEV/ADMIN only)
+│   ├── gdpval-login.html          ← Login page
+│   ├── verify-email.html          ← Email verification page
+│   ├── reset-password.html        ← Password reset page
 │   ├── config.js                  ← Backend URL configuration
 │   └── gdpval/
 │       ├── auth.js                ← Auth state management
@@ -137,11 +145,25 @@ https://github.com/Parsewave-internal/GDPVAL
 │       ├── sidebar.js             ← Navigation (role-based filtering)
 │       ├── sidebar.css
 │       ├── script.js              ← Task creator logic
-│       └── queue-script.js        ← Queue viewer logic
+│       ├── queue-script.js        ← Queue viewer logic
+│       ├── review-script.js       ← Reviewer dashboard logic
+│       ├── review-style.css       ← Reviewer dashboard styles
+│       ├── my-tasks-script.js     ← My tasks page logic
+│       └── my-tasks-style.css     ← My tasks page styles
 │
-├── pipeline/                      ← Python task processing
-│   └── scripts/
-│       └── task_submit.py         ← Task submission to DynamoDB
+├── pipeline/                      ← Python task processing & terminal_bench
+│   ├── scripts/
+│   │   ├── task_submit.py         ← Task submission to GitHub/DynamoDB
+│   │   ├── task_registry.py       ← DynamoDB task management
+│   │   ├── ai_detector.py         ← AI-generated content detection
+│   │   ├── bullshit_detector.py   ← Content quality checks
+│   │   ├── oracle_runner.py       ← Oracle test execution
+│   │   └── gdpval_worker.py       ← Background task processor
+│   └── terminal_bench/            ← Agent testing framework
+│       ├── agents/                ← AI agent implementations
+│       ├── dataset/               ← Task dataset management
+│       ├── cli/                   ← Command-line tools
+│       └── harness/               ← Test harness
 │
 └── run-server.sh                  ← Server startup script
 ```
@@ -151,6 +173,8 @@ https://github.com/Parsewave-internal/GDPVAL
 - URLs:
   - `https://gdpval.parsewave.ai/gdpval-task.html`
   - `https://gdpval.parsewave.ai/gdpval-queue.html`
+  - `https://gdpval.parsewave.ai/gdpval-review` (reviewer dashboard)
+  - `https://gdpval.parsewave.ai/gdpval-my-tasks.html`
   - `https://gdpval.parsewave.ai/gdpval-users.html`
 
 ---
@@ -444,11 +468,11 @@ After running `backend/create_auth_tables.py`:
 
 ### Permission Matrix
 
-| Role         | Task Creator | Queue Viewer | User Management |
-|--------------|-------------|--------------|-----------------|
-| **Contributor** | ✅          | ❌           | ❌              |
-| **Dev**         | ✅          | ✅           | ✅              |
-| **Admin**       | ✅          | ✅           | ✅              |
+| Role         | Task Creator | My Tasks | Queue Viewer | Reviewer | User Management |
+|--------------|-------------|----------|--------------|----------|-----------------|
+| **Contributor** | ✅          | ✅       | ❌           | ❌       | ❌              |
+| **Dev**         | ✅          | ✅       | ✅           | ✅       | ✅              |
+| **Admin**       | ✅          | ✅       | ✅           | ✅       | ✅              |
 
 ### User Management API
 
@@ -611,7 +635,7 @@ window.addEventListener('load', async () => {
 });
 ```
 
-### Sidebar Filtering (`sidebar.js:189`)
+### Sidebar Filtering (`sidebar.js`)
 
 ```javascript
 function filterMenuItems(permissions) {
@@ -621,10 +645,12 @@ function filterMenuItems(permissions) {
 
     if (permissions.can_create_tasks) {
       allowed.add('/gdpval-task');
+      allowed.add('/gdpval-my-tasks');  // All users can see their own tasks
     }
 
     if (permissions.can_view_queue) {
       allowed.add('/gdpval-queue');
+      allowed.add('/gdpval-review');  // Reviewer dashboard
     }
 
     if (permissions.can_manage_users) {
@@ -1750,31 +1776,48 @@ async def create_template(
 
 ### Validation
 
-Templates are validated during save:
+Tasks and templates are validated during save:
 - Instruction word count must be ≤ 600 words (excluding rubric)
-- Total rubric points: 20-40
+- Total rubric points: 12-60 (across all categories)
+- Points per category: 4-10
 - Rubric categories: 3-6
-- Total rubric word count: ≤ 200 words
+- Total rubric word count: ≤ 400 words
+- **Analytic Rubric Format**: Each rubric must have 4 scoring levels:
+  - Exemplary (4)
+  - Proficient (3)
+  - Basic (2)
+  - Needs Improvement (1)
+- All data files must have source attribution
 
-**Backend** (`validators.py:94`):
+**Backend** (`validators.py`):
 ```python
-def validate_instruction_word_count(
-    instruction_md: str,
-    max_words: int = 600
+# Analytic rubric configuration
+ANALYTIC_RUBRIC_LEVELS = 4
+ANALYTIC_MIN_POINTS = 4
+ANALYTIC_MAX_POINTS = 10
+ANALYTIC_LABELS = [
+    ("Needs Improvement", 1),
+    ("Basic", 2),
+    ("Proficient", 3),
+    ("Exemplary", 4),
+]
+
+def validate_rubric(
+    rubrics: list[dict],
+    min_total_points: int = 12,
+    max_total_points: int = 60,
+    min_categories: int = 3,
+    max_categories: int = 6,
+    max_total_words: int = 400,
+    min_points_per_category: int = 4,
+    max_points_per_category: int = 10
 ) -> ValidationResult:
-    """Validate that instruction (excluding rubric) has ≤ max_words"""
-    result = ValidationResult(valid=True)
+    # Validates category count, points range, analytic levels, and word count
+    ...
 
-    instruction_only = extract_instruction_without_rubric(instruction_md)
-    word_count = count_words(instruction_only)
-
-    if word_count > max_words:  # > not >=, allows exactly 600
-        result.add_error(
-            "instruction",
-            f"Instruction has {word_count} words, must be {max_words} or less"
-        )
-
-    return result
+def validate_sources_coverage(data_files: list[str], sources: list[dict]) -> ValidationResult:
+    # Ensures all data files have source attribution
+    ...
 ```
 
 ---
@@ -1788,9 +1831,9 @@ def validate_instruction_word_count(
 
 The reviewer dashboard provides a central interface for reviewing tasks, checking GitHub PR status, and managing task queue.
 
-### Frontend (`gdpval-reviewer.html`)
+### Frontend (`gdpval-review.html`)
 
-**URL**: `https://gdpval.parsewave.ai/gdpval-reviewer`
+**URL**: `https://gdpval.parsewave.ai/gdpval-review`
 **Auth**: Dev/admin only
 
 **Features**:
@@ -1887,6 +1930,52 @@ async def get_reviewer_tasks(
         "tasks": tasks[offset:offset+limit],
         "total": len(tasks)
     }
+```
+
+---
+
+## My Tasks Page
+
+**Purpose**: Allow users to view and manage their own submitted tasks
+
+### Frontend (`gdpval-my-tasks.html`)
+
+**URL**: `https://gdpval.parsewave.ai/gdpval-my-tasks.html`
+**Auth**: Required (any role - shows only user's own tasks)
+
+**Features**:
+- View all tasks submitted by current user
+- Filter by status (pending, processing, completed, failed)
+- Resubmit failed or rejected tasks
+- View task details and PR status
+- Track task lifecycle
+
+### Backend API
+
+#### GET /api/gdpval/tasks/mine
+
+**Auth**: Required (returns only current user's tasks)
+
+**Query Parameters**:
+- `status`: Filter by task status
+- `limit`: Max results (default 50)
+- `offset`: Pagination offset
+
+**Response**:
+```json
+{
+  "tasks": [
+    {
+      "task_id": "abc123",
+      "task_name": "Financial Analysis",
+      "status": "completed",
+      "pr_url": "https://github.com/org/repo/pull/123",
+      "created_at": "2026-01-05T00:00:00Z",
+      "updated_at": "2026-01-06T00:00:00Z"
+    }
+  ],
+  "total": 5
+}
 ```
 
 ---
@@ -2020,7 +2109,8 @@ All HTML files updated to reference `/static/` instead of `/gdpval/`:
 **Files Updated**:
 - `gdpval-task.html`
 - `gdpval-queue.html`
-- `gdpval-reviewer.html`
+- `gdpval-review.html`
+- `gdpval-my-tasks.html`
 - `gdpval-users.html`
 - `gdpval-login.html`
 - `verify-email.html`
@@ -2333,6 +2423,7 @@ BACKEND_API_URL: window.location.hostname === 'localhost'
 
 ---
 
-**Last Updated**: January 4, 2026 (Added Payment Info Collection System)
+**Last Updated**: January 7, 2026
+**Changes**: Updated repository structure, fixed reviewer page naming (gdpval-review.html), updated validation rules (analytic rubric format, 12-60 points, 400 word limit), added My Tasks page, added pipeline/terminal_bench documentation
 **Maintainer**: Development Team
 **Repository**: https://github.com/Parsewave-internal/GDPVAL
